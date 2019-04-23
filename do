@@ -66,10 +66,6 @@ def parseargs():
         help="Pass DNS servers to be used inside container")
     parser.add_argument("-ipc", default=None, type=str,
         help="how to use shared memory between processes.")
-    parser.add_argument("-nfsmount", action="store_true", default=False,
-        help="Mount the nfs-root of current dir as /work. Implies -nopwd")
-    parser.add_argument("-nopwd", action="store_true", default=False,
-        help="Do not mount current dir as /work")
     parser.add_argument("-onlycopy", action="store_true", default=False,
         help="Only copy the Dockerfile folder")
     parser.add_argument("-printComments", action="store_true", default=False,
@@ -133,7 +129,6 @@ class Runner:
         finalcmd = ["-it", "--rm", "--runtime", "nvidia"]
         finalcmd += self.__getPort(args.image)
         finalcmd += self.__getVols(args)
-        finalcmd += self.__getNFSmount(args)
         finalcmd += self.__getUser(args)
         finalcmd += self.__getDns(args)
         if args.ipc is not None:
@@ -182,41 +177,43 @@ class Runner:
         out = socket.getaddrinfo(rhost, 0)
         return out[0][4][0]
 
-    def __getNFSinfo(self):
+    def __getCurrentMount(self):
+        cmd = []
         out = subprocess.check_output("df . | tail -n1 | awk '{print $1}'",
                                       shell=True)
         out = out.rstrip()
-        print(out)
-        (rhost, vol) = out.split(":")
-        ip = self.__getIP(rhost)
-        basevol = os.path.basename(vol)
-        return (ip, vol, basevol)
-
-    def __getNFSmount(self, args):
-        cmd = []
-        if not args.nfsmount:
-            return cmd
-        (ip, vol, basevol) = self.__getNFSinfo()
-        volopts = [
-            "o=addr=%s" % ip,
-            "device=:%s" % vol,
-            "type=nfs,source=%s,target=/work" % basevol
-        ]
-        mountopt = "type=volume"
-        for vo in volopts:
-            mountopt += ",volume-opt=%s" % vo
-        cmd.append("--mount")
-        cmd.append(mountopt)
+        tokens = out.split(":")
+        # local mount
+        if len(tokens) == 1:
+            cmd.append("-v %s:/work:rw" % os.getcwd())
+            cmd.append("-w /work")
+        # nfs mount
+        elif len(tokens) == 2:
+            (rhost, vol) = tokens
+            ip = self.__getIP(rhost)
+            basevol = os.path.basename(vol)
+            volopts = [
+                "o=addr=%s" % ip,
+                "device=:%s" % vol,
+                "type=nfs,source=%s,target=/work" % basevol
+            ]
+            mountopt = "type=volume"
+            for vo in volopts:
+                mountopt += ",volume-opt=%s" % vo
+            cmd.append("--mount")
+            cmd.append(mountopt)
+            # TODO: doing this causes the following error!?
+            # docker: Error response from daemon: chown /var/lib/docker/volumes/<volumeName>/_data: operation not permitted.
+            #cmd.append("-w /work")
+        else:
+            raise Exception("Bad mount!?")
         return cmd
 
     def __getVols(self, args):
         vols = []
         for vol in args.v:
             vols.append("-v %s" % vol)
-        # Prohibit pwd-mounting if nfsmount is set!
-        if not args.nopwd and not args.nfsmount:
-            vols.append("-v %s:/work:rw" % os.getcwd())
-            vols.append("-w /work")
+        vols += self.__getCurrentMount()
         return vols
 
     def __getDns(self, args):
