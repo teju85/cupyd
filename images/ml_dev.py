@@ -7,10 +7,10 @@ import modules.openmpi
 
 
 def emit(writer, **kwargs):
-    if "cudaVersion" not in kwargs:
-        raise Exception("'cudaVersion' is mandatory!")
-    cudaVersion = kwargs["cudaVersion"]
-    modules.cuda_dev.emit(writer, cudaVersion)
+    if "cudaVersionFull" not in kwargs:
+        raise Exception("'cudaVersionFull' is mandatory!")
+    cudaVersionFull = kwargs["cudaVersionFull"]
+    modules.cuda_dev.emit(writer, cudaVersionFull)
     modules.cudf.emit(writer)
     modules.cuml_dev.emit(writer)
     modules.ssh.emit(writer)
@@ -23,7 +23,10 @@ def emit(writer, **kwargs):
 
 def images():
     return {
-        "ml-dev:9.2": { "cudaVersion": "9.2.88",
+        "ml-dev:9.2": { "cudaVersionFull": "9.2.88",
+                        "base": "ubuntu:16.04",
+                        "needsContext": True },
+        "ml-dev:10.0": { "cudaVersionFull": "10.0.130",
                         "base": "ubuntu:16.04",
                         "needsContext": True }
     }

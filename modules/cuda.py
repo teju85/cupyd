@@ -25,12 +25,12 @@ def shortVersion(cudaVersionFull):
     major = match.group(1)
     minor = match.group(2)
     versionShort = "%s.%s" % (major, minor)
-    return major, minor, versionShort
+    pkgVersion = "%s-%s=%s-1" % (major, minor, cudaVersionFull)
+    return major, minor, versionShort, pkgVersion
 
 
 def emit(writer, cudaVersionFull):
-    major, minor, versionShort = shortVersion(cudaVersionFull)
-    pkgVersion = "%s-%s=%s-1" % (major, minor, cudaVersionFull)
+    major, minor, versionShort, pkgVersion = shortVersion(cudaVersionFull)
     emitHeader(writer)
     writer.emit("ENV CUDA_VERSION $cudaVersionFull", cudaVersionFull=cudaVersionFull)
     writer.packages(["cuda-cublas-$pkgVersion",

@@ -60,6 +60,8 @@ def parseargs():
     parser = argparse.ArgumentParser(description=desc)
     parser.add_argument("-build", default=False, action="store_true",
         help="Build the docker image locally first")
+    parser.add_argument("-copy", default=None, type=str,
+        help="Copy the temporary build dir into this dir")
     parser.add_argument("-dns", default=[], action="append", type=str,
         help="Pass DNS servers to be used inside container")
     parser.add_argument("-ipc", default=None, type=str,
@@ -68,16 +70,16 @@ def parseargs():
         help="Mount the nfs-root of current dir as /work. Implies -nopwd")
     parser.add_argument("-nopwd", action="store_true", default=False,
         help="Do not mount current dir as /work")
-    parser.add_argument("-copy", default=None, type=str,
-        help="Copy the temporary build dir into this dir")
-    parser.add_argument("-repo", default=None, type=str,
-        help="Remote registry prefix to pull/push this image from/to")
+    parser.add_argument("-onlycopy", action="store_true", default=False,
+        help="Only copy the Dockerfile folder")
     parser.add_argument("-printComments", action="store_true", default=False,
         help="Print the origin of docker commands in the generated Dockerfile")
     parser.add_argument("-pull", action="store_true", default=False,
         help="Pull the image first from a remote registry.")
     parser.add_argument("-push", action="store_true", default=False,
         help="Push the local image to a remote registry.")
+    parser.add_argument("-repo", default=None, type=str,
+        help="Remote registry prefix to pull/push this image from/to")
     parser.add_argument("-run", default=False, action="store_true",
         help="Run the image to launch a container")
     parser.add_argument("-runas", choices=["user", "root", "uid"],
@@ -243,6 +245,10 @@ class Writer:
         self.fp = open(self.file, "w")
         self.past = set()
         self.fp.write("# Generated file. Do NOT modify!\n")
+        self.fp.flush()
+
+    def __del__(self):
+        self.fp.close()
 
     def emit(self, str, caller=1, **kwargs):
         str = str.rstrip() + "\n"
@@ -252,6 +258,7 @@ class Writer:
         if frame in self.past:
             if self.verbose:
                 self.fp.write("### %s already called\n" % frame)
+                self.fp.flush()
             return
         self.past.add(frame)
         if self.verbose:
@@ -260,6 +267,7 @@ class Writer:
             str = start + str + end
         s = Template(str)
         self.fp.write(s.substitute(kwargs))
+        self.fp.flush()
 
     def packages(self, pkgs, caller=2, **kwargs):
         if len(pkgs) <= 0:
@@ -267,7 +275,7 @@ class Writer:
         if "installOpts" not in kwargs:
             kwargs["installOpts"] = ""
         str = """RUN apt-get update && \\
-    apt-get install -y --no-install-recommends $installOpts && """
+    apt-get install -y --no-install-recommends $installOpts """
         for p in pkgs:
             str += "\\\n        %s " % p
         str += """&& \\
@@ -311,11 +319,13 @@ class Builder:
         print("Generating Dockerfile...")
         self.writer.emit("FROM %s\n" % imgArgs["base"])
         self.args.module.emit(writer=self.writer, **imgArgs)
-        print("Building image '%s'..." % self.args.image)
         if "needsContext" in imgArgs and imgArgs["needsContext"]:
             print("Copying contexts...")
             copydir(os.path.join(self.pwd, "shared-contexts"),
                     os.path.join(self.builddir, "contexts"))
+        if self.args.onlycopy:
+            return
+        print("Building image '%s'..." % self.args.image)
         dockercmd("build", "-t", self.args.image, ".")
 
 

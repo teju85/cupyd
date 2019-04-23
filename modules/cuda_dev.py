@@ -3,8 +3,7 @@ import cuda
 
 
 def emit(writer, cudaVersionFull):
-    major, minor, versionShort = cuda.shortVersion(cudaVersionFull)
-    pkgVersion = "%s-%s=%s-1" % (major, minor, cudaVersionFull)
+    major, minor, versionShort, pkgVersion = cuda.shortVersion(cudaVersionFull)
     cuda.emit(writer, cudaVersionFull)
     if versionShort == "9.2":
         writer.packages(["cuda-compiler-$pkgVersion",
