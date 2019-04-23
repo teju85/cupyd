@@ -10,6 +10,7 @@ import socket
 import getpass
 import tempfile
 import pkgutil
+import sys
 
 
 def runcmd(cmd):
@@ -41,6 +42,17 @@ def findimage(image, dir="images"):
     raise Exception("Failed to find image '%s'!" % image)
 
 
+def listimages(dir="images"):
+    imgs = []
+    for importer, package, _ in pkgutil.iter_modules([dir]):
+        fullName = '%s.%s' % (dir, package)
+        module = importer.find_module(package).load_module(fullName)
+        imgs += module.images().keys()
+    print("List of images supported:")
+    for img in imgs:
+        print(" . %s" % img)
+
+
 def validateargs(args):
     if args.build and args.pull:
         raise Exception("Cannot pass both '-build' and '-pull'!")
@@ -52,7 +64,8 @@ def validateargs(args):
         raise Exception("'-copy' is meaningful only with '-build'!")
     if args.image is None:
         raise Exception("'image' is mandatory!")
-    args.module, args.imageArgs = findimage(args.image)
+    if not args.list:
+        args.module, args.imageArgs = findimage(args.image)
 
 
 def parseargs():
@@ -66,6 +79,8 @@ def parseargs():
         help="Pass DNS servers to be used inside container")
     parser.add_argument("-ipc", default=None, type=str,
         help="how to use shared memory between processes.")
+    parser.add_argument("-list", action="store_true", default=False,
+        help="List all images supported")
     parser.add_argument("-onlycopy", action="store_true", default=False,
         help="Only copy the Dockerfile folder")
     parser.add_argument("-printComments", action="store_true", default=False,
@@ -332,6 +347,9 @@ class Builder:
 
 if __name__ == "__main__":
     args = parseargs()
+    if args.list:
+        listimages()
+        sys.exit(0)
     if args.build:
         with Builder(args) as b:
             b.run()
