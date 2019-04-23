@@ -24,16 +24,22 @@ def shortVersion(cudaVersionFull):
         raise Exception("Bad cudaVersionFull passed! [%s]" % cudaVersionFull)
     major = match.group(1)
     minor = match.group(2)
+    subminor = match.group(3)
     versionShort = "%s.%s" % (major, minor)
     pkgVersion = "%s-%s=%s-1" % (major, minor, cudaVersionFull)
-    return major, minor, versionShort, pkgVersion
+    return major, minor, subminor, versionShort, pkgVersion
 
 
 def emit(writer, cudaVersionFull):
-    major, minor, versionShort, pkgVersion = shortVersion(cudaVersionFull)
+    major, minor, subminor, versionShort, pkgVersion = shortVersion(cudaVersionFull)
     emitHeader(writer)
     writer.emit("ENV CUDA_VERSION $cudaVersionFull", cudaVersionFull=cudaVersionFull)
-    writer.packages(["cuda-cublas-$pkgVersion",
+    short = float(versionShort)
+    if short < 10.1:
+        cublas = "cuda-cublas-$pkgVersion"
+    else:
+        cublas = "libcublas%s=%s.0.%s-1" % (major, versionShort, subminor)
+    writer.packages([cublas,
                      "cuda-cudart-$pkgVersion",
                      "cuda-cufft-$pkgVersion",
                      "cuda-curand-$pkgVersion",
