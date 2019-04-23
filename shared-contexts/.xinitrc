@@ -1,0 +1,2 @@
+#!/bin/sh
+. /etc/X11/Xsession

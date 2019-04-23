@@ -1,0 +1,119 @@
+#!/bin/bash
+# Script to help during xgboost development
+
+function find_first() {
+    local file=$1
+    if [ "$file" = "" ]; then
+        return 1
+    fi
+    while [ true ]; do
+        if [ -e "$file" ]; then
+            readlink -f $file
+            return 0
+        fi
+        cd ..
+        if [ "`pwd`" = "/" ]; then
+            return 1
+        fi
+    done
+}
+
+function rebuild() {
+    echo "rebuild: PWD: " `pwd`
+    make -j && \
+        cd ../python-package && \
+        python setup.py install --user
+}
+
+function clean() {
+    cd .. && \
+        rm -rf build && \
+        mkdir build && \
+        cd build
+}
+
+function build-cpu() {
+    echo "build-cpu: PWD: " `pwd`
+    rm -rf ../gtest && \
+        cp -r /opt/googletest/googletest/build/gtest .. && \
+        cmake .. -DGOOGLE_TEST=ON -DGTEST_ROOT=`pwd`/../gtest && \
+        rebuild
+}
+
+function build-gpu() {
+    echo "build-gpu: PWD: " `pwd`
+    rm -rf ../gtest && \
+        cp -r /opt/googletest/googletest/build/gtest .. && \
+        cmake .. -DUSE_CUDA=ON \
+              -DUSE_NCCL=ON \
+              -DGOOGLE_TEST=ON \
+              -DGTEST_ROOT=`pwd`/../gtest && \
+        rebuild
+}
+
+function test-cpu() {
+    pushd .. && \
+        ./testxgboost && \
+        popd
+}
+
+function test-gpu() {
+    pushd .. && \
+        ./testxgboost && \
+        popd
+}
+
+function py-test() {
+    pushd ../tests/python-gpu && \
+        python -m unittest test_gpu_prediction \
+               test_gpu_updaters \
+               test_monotonic_constraints && \
+        popd
+}
+
+function precommit() {
+    pushd .. && \
+        rm -rf doc/Doxygen && \
+        python dmlc-core/scripts/lint.py xgboost all include src plugin && \
+        doxygen doc/Doxyfile && \
+        popd && \
+        clean && \
+        build-cpu && \
+        test-cpu && \
+        clean && \
+        build-gpu && \
+        test-gpu && \
+        py-test
+    if [ "$?" == "0" ]; then
+        echo "pre-commit checks: SUCCESS"
+        return 0
+    else
+        echo "pre-commit checks: FAILED"
+        return 1
+    fi
+}
+
+# go to the root of xgboost repo
+root=`find_first .git`
+root="$root/.."
+# execute command(s) passed by the user
+while [ "$1" != "" ]; do
+    case "$1" in
+        "build-cpu"|"build-gpu"|"clean"|"test-cpu"|"test-gpu"|"precommit"|"rebuild")
+            if [ "$root" = "/" ] || [ ! -d "$root" ]; then
+                echo "Error: Invalid root of xgboost folder!"
+                exit 1
+            fi
+            build="$root/build"
+            mkdir -p $build
+            cd $build
+            $1
+            shift;;
+        "help"|"h")
+            echo "USAGE: xgb [build-cpu|build-gpu|clean|test-cpu|test-gpu|precommit|rebuild|py-test]"
+            exit 0;;
+        *)
+            echo "Error: Bad arg passed! '$1'"
+            exit 1;;
+    esac
+done

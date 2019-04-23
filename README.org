@@ -1,0 +1,27 @@
+* Intro
+Pretty much standalone infrastructure to develop/build/run docker images which
+are CUDA-enabled.
+
+* Pre-reqs
+The main goal behind this setup is to have as minimal dependencies as possible.
+That way, users can start with bare-minimal host OS installation and express
+complexities inside their docker images.
+- python
+- docker
+- gpu-enabled system (preferrably >= Maxwell arch)
+- nvidia-docker
+- latest cuda driver
+
+* Example
+Currently, the only supported docker base image is from Ubuntu 16.04. If you
+want to build the image 'ml-dev:9.2' on your system:
+#+BEGIN_src bash
+./do -build ml-dev:9.2
+#+END_src
+Refer to the '-h' option of this script to know more about its usage.
+
+* Running containers on these images
+#+BEGIN_src bash
+./do -run ml:dev:9.2 /bin/bash
+#+END_src
+Refer to the '-h' option of this script to know more about its usage.
