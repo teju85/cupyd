@@ -186,6 +186,7 @@ class Runner:
         out = subprocess.check_output("df . | tail -n1 | awk '{print $1}'",
                                       shell=True)
         out = out.rstrip()
+        print(out)
         (rhost, vol) = out.split(":")
         ip = self.__getIP(rhost)
         basevol = os.path.basename(vol)
@@ -303,9 +304,12 @@ class Builder:
         self.pwd = os.getcwd()
         os.chdir(self.builddir)
         print("Working out of %s..." % self.builddir)
-        self.writer = Writer(verbose=self.args.printComments)
 
-    def __del__(self):
+    def __enter__(self):
+        self.writer = Writer(verbose=self.args.printComments)
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
         del self.writer
         os.chdir(self.pwd)
         if self.args.copy:
@@ -332,7 +336,8 @@ class Builder:
 if __name__ == "__main__":
     args = parseargs()
     if args.build:
-        Builder(args).run()
+        with Builder(args) as b:
+            b.run()
     elif args.pull:
         Puller(args).run()
     # push should only be done after a build!
