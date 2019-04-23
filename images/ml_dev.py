@@ -2,6 +2,7 @@ from __future__ import absolute_import
 import modules.cuda_dev
 import modules.cudf
 import modules.cuml_dev
+import modules.runas
 import modules.ssh
 import modules.openmpi
 
@@ -13,6 +14,7 @@ def emit(writer, **kwargs):
     modules.cuda_dev.emit(writer, cudaVersionFull)
     modules.cudf.emit(writer)
     modules.cuml_dev.emit(writer)
+    modules.runas.emit(writer)
     modules.ssh.emit(writer)
     modules.openmpi.emit(writer, devBuild=True, m4Version="1.4.18",
                          autoconfVersion="2.69", automakeVersion="1.16",

@@ -1,3 +1,3 @@
 
 def emit(writer):
-    writer.packages(["build-essential", "git" "make", "tar", "wget"])
+    writer.packages(["build-essential", "git", "make", "tar", "wget"])
