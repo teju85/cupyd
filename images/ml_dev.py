@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 import modules.cuda_dev
-import modules.cudf
 import modules.cuml_dev
+import modules.conda_ml_env
 import modules.runas
 import modules.ssh
 import modules.openmpi
@@ -12,15 +12,13 @@ def emit(writer, **kwargs):
         raise Exception("'cudaVersionFull' is mandatory!")
     cudaVersionFull = kwargs["cudaVersionFull"]
     modules.cuda_dev.emit(writer, cudaVersionFull)
-    modules.cudf.emit(writer)
+    modules.conda_ml_env.emit(writer)
     modules.cuml_dev.emit(writer)
     modules.runas.emit(writer)
     modules.ssh.emit(writer)
     modules.openmpi.emit(writer, devBuild=True, m4Version="1.4.18",
                          autoconfVersion="2.69", automakeVersion="1.16",
                          libtoolVersion="2.4.6", flexVersion="2.6.4")
-    writer.packages(["clang", "clang-format", "gzip", "libpthread-stubs0-dev",
-                     "tar", "unzip", "zlib1g-dev"])
 
 
 def images():
