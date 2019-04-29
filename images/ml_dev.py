@@ -19,6 +19,7 @@ def emit(writer, **kwargs):
                          autoconfVersion="2.69", automakeVersion="1.16",
                          libtoolVersion="2.4.6", flexVersion="2.6.4")
     modules.cuml_dev.emit(writer, **kwargs)
+    writer.condaPackages(["libclang", "clang"], channels=["teju85"])
 
 
 rapidsVersion = "0.7"
