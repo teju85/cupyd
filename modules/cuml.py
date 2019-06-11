@@ -5,11 +5,11 @@ import cudf
 def emit(writer, rapidsVersion):
     conda_ml_env.emit(writer)
     cudf.emit(writer, rapidsVersion)
-    writer.packages(["clang", "clang-format", "doxygen", "graphviz", "gzip",
+    writer.packages(["doxygen", "graphviz", "gzip",
                      "libopenblas-dev", "libpthread-stubs0-dev", "tar", "unzip",
                      "zlib1g-dev"])
     writer.condaPackages(["boost", "cmake=3.13", "Cython", "dask", "distributed",
-                          "pytest", "scikit-learn"],
+                          "libclang", "pytest", "scikit-learn", "umap-learn"],
                          channels=["anaconda", "numba", "conda-forge",
                                    "nvidia/label/cuda$$CUDA_VERSION_SHORT",
                                    "rapidsai/label/cuda$$CUDA_VERSION_SHORT",

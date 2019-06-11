@@ -24,7 +24,18 @@ def emit(writer, **kwargs):
     modules.cudf.emit(writer, rapidsVersion=rapidsVersion)
     modules.cuml.emit(writer, rapidsVersion=rapidsVersion)
     modules.xgboost.emit(writer, ncclVersion=ncclVersion)
-    writer.emit("""RUN git clone https://github.com/JohnZed/cuml-samples /opt/cuml-samples""")
+    writer.emit("""RUN git clone https://github.com/JohnZed/cuml-samples /opt/cuml-samples && \\
+    chmod a+x /opt/cuml-samples/*.py""")
+    writer.emit("""WORKDIR /opt/cuml-samples""")
+    writer.emit("""RUN wget https://developer.nvidia.com/rdp/assets/Nsight_Systems_2019_3_Linux_installer && \\
+    chmod +x Nsight_Systems_2019_3_Linux_installer && \\
+    ./Nsight_Systems_2019_3_Linux_installer --accept --quiet && \\
+    mv NsightSystems-* /usr/local/cuda/NsightSystems && \\
+    rm -f Nsight_Systems_2019_3_Linux_installer""")
+    writer.emit("""ENV PATH=/usr/local/cuda/NsightSystems/Target-x86_64/x86_64/:$${PATH}
+ENV PATH=/usr/local/cuda/NsightSystems/Host-x86_64/:$${PATH}
+ENV LD_LIBRARY_PATH=/usr/local/cuda/NsightSystems/Target-x86_64/x86_64/:$${LD_LIBRARY_PATH}
+ENV LD_LIBRARY_PATH=/usr/local/cuda/NsightSystems/Host-x86_64/:$${LD_LIBRARY_PATH}""")
 
 
 rapidsVersion = "0.7"

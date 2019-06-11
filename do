@@ -58,14 +58,14 @@ def validateargs(args):
         raise Exception("Cannot pass both '-build' and '-pull'!")
     if args.pull and args.push:
         raise Exception("Useless combination of options '-pull' and '-push'!")
-    if args.build and not args.image:
+    if args.build and not args.img:
         raise Exception("'-image' is needed with '-build'!")
     if args.copy and not args.build:
         raise Exception("'-copy' is meaningful only with '-build'!")
-    if args.image is None:
-        raise Exception("'image' is mandatory!")
+    if not args.list and args.img is None:
+        raise Exception("'-img' is mandatory if '-list' is not passed!")
     if not args.list:
-        args.module, args.imageArgs = findimage(args.image)
+        args.module, args.imgArgs = findimage(args.img)
 
 
 def parseargs():
@@ -103,7 +103,8 @@ def parseargs():
         help="Same as --security-opt option of docker")
     parser.add_argument("-v", default=[], action="append", type=str,
         help="Volumes to mount. Same syntax as docker run")
-    parser.add_argument("image", help="Image to build/push/pull/launch")
+    parser.add_argument("-img", type=str, default=None,
+        help="Image to build/push/pull/launch")
     parser.add_argument("cmd", nargs=argparse.REMAINDER,
         help="Command to run inside the container")
     args = parser.parse_args()
@@ -116,7 +117,7 @@ class Puller:
         self.args = args
 
     def run(self):
-        here = self.args.image
+        here = self.args.img
         there = self.args.repo + here
         dockercmd("pull", there)
         dockercmd("tag", there, here)
@@ -128,7 +129,7 @@ class Pusher:
         self.args = args
 
     def run(self):
-        here = self.args.image
+        here = self.args.img
         there = self.args.repo + here
         dockercmd("tag", here, there)
         dockercmd("push", there)
@@ -142,7 +143,7 @@ class Runner:
     def run(self):
         args = self.args
         finalcmd = ["-it", "--rm", "--runtime", "nvidia"]
-        finalcmd += self.__getPort(args.image)
+        finalcmd += self.__getPort(args.img)
         finalcmd += self.__getVols(args)
         finalcmd += self.__getUser(args)
         finalcmd += self.__getDns(args)
@@ -150,7 +151,7 @@ class Runner:
             finalcmd += ["--ipc=%s" % args.ipc]
         if args.security is not None:
             finalcmd += ["--security-opt=\"%s\"" % args.security]
-        finalcmd.append(args.image)
+        finalcmd.append(args.img)
         finalcmd += self.__getCmd(args)
         print("Host IP Address: %s" % socket.gethostbyname(socket.getfqdn()))
         print(finalcmd)
@@ -166,7 +167,7 @@ class Runner:
         return output
 
     def __getCmd(self, args):
-        arr = self.__get(args.image, "Config", "Cmd")
+        arr = self.__get(args.img, "Config", "Cmd")
         if len(args.cmd) > 0:
             cmd = " ".join(args.cmd)
         elif len(arr) > 0:
@@ -331,7 +332,7 @@ class Builder:
         shutil.rmtree(self.builddir)
 
     def run(self):
-        imgArgs = self.args.imageArgs
+        imgArgs = self.args.imgArgs
         print("Generating Dockerfile...")
         self.writer.emit("FROM %s\n" % imgArgs["base"])
         self.args.module.emit(writer=self.writer, **imgArgs)
@@ -341,8 +342,8 @@ class Builder:
                     os.path.join(self.builddir, "contexts"))
         if self.args.onlycopy:
             return
-        print("Building image '%s'..." % self.args.image)
-        dockercmd("build", "-t", self.args.image, ".")
+        print("Building image '%s'..." % self.args.img)
+        dockercmd("build", "-t", self.args.img, ".")
 
 
 if __name__ == "__main__":
