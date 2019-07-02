@@ -22,7 +22,7 @@ def emit(writer, **kwargs):
     writer.condaPackages(["libclang", "clang"], channels=["teju85"])
 
 
-rapidsVersion = "0.7"
+rapidsVersion = "0.8"
 def images():
     return {
         "ml-dev:9.2": { "cudaVersionFull": "9.2.88",
