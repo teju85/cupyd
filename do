@@ -205,7 +205,7 @@ class Runner:
         tokens = out.split(":")
         # local mount
         if len(tokens) == 1:
-            cmd.append("-v %s:/work:rw" % os.getcwd())
+            cmd.append("-v %s:/work" % os.getcwd())
             cmd.append("-w /work")
         # nfs mount
         elif len(tokens) == 2:
