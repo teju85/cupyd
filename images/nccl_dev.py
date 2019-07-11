@@ -1,8 +1,8 @@
 from __future__ import absolute_import
 import modules.cuda_dev
+import modules.openmpi
 import modules.runas
 import modules.ssh
-import modules.openmpi
 import modules.cuda
 
 
@@ -17,15 +17,15 @@ def emit(writer, **kwargs):
     ompiVersion = kwargs["ompiVersion"]
     ncclVersion = kwargs["ncclVersion"]
     modules.cuda_dev.emit(writer, cudaVersionFull)
-    modules.runas.emit(writer)
-    modules.ssh.emit(writer)
-    modules.openmpi.emit(writer, devBuild=False, ompiVersion=ompiVersion)
     major, minor, _, _, _ = modules.cuda.shortVersion(cudaVersionFull)
     writer.packages(["libnccl2=$ncclVersion-1+cuda$major.$minor",
                      "libnccl-dev=$ncclVersion-1+cuda$major.$minor"],
                     major=major,
                     minor=minor,
                     ncclVersion=ncclVersion)
+    modules.openmpi.emit(writer, devBuild=False, ompiVersion=ompiVersion)
+    modules.runas.emit(writer)
+    modules.ssh.emit(writer)
 
 
 ompiVersion = "3.1.3"
