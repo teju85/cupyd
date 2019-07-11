@@ -10,7 +10,7 @@ def emit(writer, devBuild=False, m4Version="1.4.18", autoconfVersion="2.69",
         if match is None:
             raise Exception("Incorrect ompiVersion passed! [%s]" % ompiVersion)
         ompiShort = "%s.%s" % (match.group(1), match.group(2))
-        writer.emit("""RUN wget "https://download.open-mpi.org/release/open-mpi/v$ompiShort/openmpi-$ompiVersion.tar.gz" \\
+        writer.emit("""RUN wget --no-check-certificate "https://download.open-mpi.org/release/open-mpi/v$ompiShort/openmpi-$ompiVersion.tar.gz" \\
         -O /opt/openmpi.tar.gz && \\
     cd /opt && \\
     tar xf /opt/openmpi.tar.gz && \\
