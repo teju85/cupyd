@@ -1,7 +1,8 @@
 
-def emit(writer, sshPort="22"):
+def emit(writer, sshPort="22", nsightPort="45555"):
     writer.emit("""ENV DEBIAN_FRONTEND noninteractive
-EXPOSE $sshPort""", sshPort=sshPort)
+EXPOSE $sshPort
+EXPOSE $nsightPort""", sshPort=sshPort, nsightPort=nsightPort)
     writer.packages(["openssh-server"])
     writer.emit("""COPY "contexts/ssh" "/opt/ssh/"
 
