@@ -31,7 +31,8 @@ def copydir(src, dst):
     shutil.copytree(src, dst)
 
 
-def findimage(image, dir="images"):
+def findimage(args, dir="images"):
+    image = args.img
     for importer, package, _ in pkgutil.iter_modules([dir]):
         fullName = '%s.%s' % (dir, package)
         module = importer.find_module(package).load_module(fullName)
@@ -39,7 +40,10 @@ def findimage(image, dir="images"):
         for img in imgs.keys():
             if img == image:
                 return module, imgs[img]
-    raise Exception("Failed to find image '%s'!" % image)
+    if args.build:
+        raise Exception("Failed to find image '%s'!" % image)
+    else:
+        return None, None
 
 
 def listimages(dir="images"):
@@ -65,7 +69,7 @@ def validateargs(args):
     if not args.list and args.img is None:
         raise Exception("'-img' is mandatory if '-list' is not passed!")
     if not args.list:
-        args.module, args.imgArgs = findimage(args.img)
+        args.module, args.imgArgs = findimage(args)
 
 
 def parseargs():
