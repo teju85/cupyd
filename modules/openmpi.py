@@ -4,6 +4,7 @@ import re
 def emit(writer, devBuild=False, m4Version="1.4.18", autoconfVersion="2.69",
          automakeVersion="1.16", libtoolVersion="2.4.6", flexVersion="2.6.4",
          ompiVersion="3.1.3"):
+    writer.packages(["wget"])
     if not devBuild:
         ompiRegex = re.compile(r"^(\d+)[.](\d+)")
         match = ompiRegex.search(ompiVersion)
