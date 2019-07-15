@@ -6,7 +6,7 @@ def emit(writer, **kwargs):
     writer.packages(["clang", "clang-format", "doxygen", "graphviz", "gzip",
                      "libopenblas-dev", "libpthread-stubs0-dev", "tar", "unzip",
                      "zlib1g-dev"])
-    writer.condaPackages(["boost", "cmake=3.13", "cudf=$rapidsVersion.*", "Cython",
+    writer.condaPackages(["boost", "cmake=3.14", "cudf=$rapidsVersion.*", "Cython",
                           "dask", "distributed", "pytest", "scikit-learn",
                           "umap-learn"],
                          channels=["anaconda", "numba", "conda-forge",
