@@ -19,22 +19,25 @@ def emit(writer, **kwargs):
                          autoconfVersion="2.69", automakeVersion="1.16",
                          libtoolVersion="2.4.6", flexVersion="2.6.4")
     modules.cuml_dev.emit(writer, **kwargs)
-    writer.condaPackages(["libclang", "clang"], channels=["teju85"])
 
 
 rapidsVersion = "0.8"
+ncclVersion = "2.4.7"
 def images():
     return {
         "ml-dev:9.2": { "cudaVersionFull": "9.2.88",
                         "base": "ubuntu:16.04",
                         "needsContext": True,
-                        "rapidsVersion": rapidsVersion },
+                        "rapidsVersion": rapidsVersion,
+                        "ncclVersion": ncclVersion },
         "ml-dev:10.0": { "cudaVersionFull": "10.0.130",
                          "base": "ubuntu:16.04",
                          "needsContext": True,
-                         "rapidsVersion": rapidsVersion },
+                         "rapidsVersion": rapidsVersion,
+                         "ncclVersion": ncclVersion },
         "ml-dev:10.1": { "cudaVersionFull": "10.1.105",
                          "base": "ubuntu:16.04",
                          "needsContext": True,
-                         "rapidsVersion": rapidsVersion }
+                         "rapidsVersion": rapidsVersion,
+                         "ncclVersion": ncclVersion }
     }
