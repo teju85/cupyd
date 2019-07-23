@@ -199,14 +199,16 @@ class Runner:
 
     def __getCurrentMount(self):
         cmd = []
-        out = subprocess.check_output("df . | tail -n1 | awk '{print $1}'",
+        out = subprocess.check_output("df . | tail -n1 | awk '{print $1,$NF}'",
                                       shell=True)
         out = out.rstrip()
-        tokens = out.split(":")
+        dirs = out.split(" ")
+        tokens = dirs[0].split(":")
         # local mount
         if len(tokens) == 1:
-            cmd.append("-v %s:/work" % os.getcwd())
-            cmd.append("-w /work")
+            cwd = os.getcwd()
+            cmd.append("-v %s:%s" % (cwd, cwd))
+            cmd.append("-w %s" % cwd)
         # nfs mount
         elif len(tokens) == 2:
             (rhost, vol) = tokens
@@ -215,7 +217,7 @@ class Runner:
             volopts = [
                 "o=addr=%s" % ip,
                 "device=:%s" % vol,
-                "type=nfs,source=%s,target=/work" % basevol
+                "type=nfs,source=%s,target=%s" % (basevol, dirs[1])
             ]
             mountopt = "type=volume"
             for vo in volopts:
