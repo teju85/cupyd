@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python
 from string import Template
 import inspect
@@ -89,6 +90,8 @@ def parseargs():
         help="Only copy the Dockerfile folder")
     parser.add_argument("-printComments", action="store_true", default=False,
         help="Print the origin of docker commands in the generated Dockerfile")
+    parser.add_argument("-privileged", action="store_true", default=False,
+        help="Pass a '--privileged' option to docker run command.")
     parser.add_argument("-pull", action="store_true", default=False,
         help="Pull the image first from a remote registry.")
     parser.add_argument("-push", action="store_true", default=False,
@@ -151,6 +154,8 @@ class Runner:
         finalcmd += self.__getVols(args)
         finalcmd += self.__getUser(args)
         finalcmd += self.__getDns(args)
+        if args.privileged:
+            finalcmd.append("--privileged")
         if args.ipc is not None:
             finalcmd += ["--ipc=%s" % args.ipc]
         if args.security is not None:
