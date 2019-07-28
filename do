@@ -81,6 +81,8 @@ def parseargs():
         help="Copy the temporary build dir into this dir")
     parser.add_argument("-dns", default=[], action="append", type=str,
         help="Pass DNS servers to be used inside container")
+    parser.add_argument("-img", type=str, default=None,
+        help="Image to build/push/pull/launch")
     parser.add_argument("-ipc", default=None, type=str,
         help="how to use shared memory between processes.")
     parser.add_argument("-list", action="store_true", default=False,
@@ -109,8 +111,6 @@ def parseargs():
         help="Same as --security-opt option of docker")
     parser.add_argument("-v", default=[], action="append", type=str,
         help="Volumes to mount. Same syntax as docker run")
-    parser.add_argument("-img", type=str, default=None,
-        help="Image to build/push/pull/launch")
     parser.add_argument("cmd", nargs=argparse.REMAINDER,
         help="Command to run inside the container")
     args = parser.parse_args()
