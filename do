@@ -14,6 +14,7 @@ import sys
 
 
 def runcmd(cmd):
+    print(cmd)
     subprocess.check_call(cmd, shell=True)
 
 
@@ -153,6 +154,8 @@ class Runner:
         finalcmd += self.__getVols(args)
         finalcmd += self.__getUser(args)
         finalcmd += self.__getDns(args)
+        finalcmd += self.__getHostname(args)
+        finalcmd += self.__getHostIp(args)
         if args.privileged:
             finalcmd.append("--privileged")
         if args.ipc is not None:
@@ -161,8 +164,6 @@ class Runner:
             finalcmd += ["--security-opt=\"%s\"" % args.security]
         finalcmd.append(args.img)
         finalcmd += self.__getCmd(args)
-        print("Host IP Address: %s" % socket.gethostbyname(socket.getfqdn()))
-        print(finalcmd)
         dockercmd("run", *finalcmd)
 
     def __get(self, image, *args):
@@ -247,6 +248,15 @@ class Runner:
         for d in args.dns:
             dns.append("--dns %s" % d)
         return dns
+
+    def __getHostname(self, args):
+        hn = "%s/%s" % (socket.gethostname(), args.img)
+        return ["-h", hn]
+
+    def __getHostIp(self, args):
+        hostIp = socket.gethostbyname(socket.getfqdn())
+        print("Host IP Address: %s" % hostIp)
+        return ["-e", "HOST_IP=%s" % hostIp]
 
     def __getUser(self, args):
         out = []
