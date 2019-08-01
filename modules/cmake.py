@@ -1,5 +1,5 @@
 import re
-import build_essential
+import modules.build_essential
 
 
 def shortVersion(cmakeVersionFull):
@@ -16,7 +16,7 @@ def shortVersion(cmakeVersionFull):
 
 def emit(writer, cmakeVersionFull):
     major, minor, short = shortVersion(cmakeVersionFull)
-    build_essential.emit(writer)
+    modules.build_essential.emit(writer)
     writer.packages(["curl", "libcurl4-openssl-dev", "zlib1g-dev"])
     writer.emit("""ENV CMAKE_SHORT_VERSION $short
 ENV CMAKE_LONG_VERSION  $full

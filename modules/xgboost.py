@@ -1,8 +1,8 @@
-import conda_ml_env
+import modules.conda_ml_env
 
 
 def emit(writer, ncclVersion):
-    conda_ml_env.emit(writer)
+    modules.conda_ml_env.emit(writer)
     writer.packages(["cmake", "git",
                      "libnccl2=$ncclVersion-1+cuda$$CUDA_VERSION_SHORT",
                      "libnccl-dev=$ncclVersion-1+cuda$$CUDA_VERSION_SHORT",

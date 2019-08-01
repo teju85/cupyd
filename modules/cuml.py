@@ -1,10 +1,10 @@
-import conda_ml_env
-import cudf
+import modules.conda_ml_env
+import modules.cudf
 
 
 def emit(writer, rapidsVersion):
-    conda_ml_env.emit(writer)
-    cudf.emit(writer, rapidsVersion)
+    modules.conda_ml_env.emit(writer)
+    modules.cudf.emit(writer, rapidsVersion)
     writer.packages(["doxygen", "graphviz", "gzip",
                      "libopenblas-dev", "libpthread-stubs0-dev", "tar", "unzip",
                      "zlib1g-dev"])

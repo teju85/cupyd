@@ -1,8 +1,8 @@
-import conda_ml_env
+import modules.conda_ml_env
 
 
 def emit(writer, rapidsVersion):
-    conda_ml_env.emit(writer)
+    modules.conda_ml_env.emit(writer)
     writer.condaPackages(["boost", "cffi", "cmake=3.13", "Cython", "distributed",
                           "llvmlite", "numba", "nvstrings=$rapidsVersion.*",
                           "pandas>=0.23.4", "pyarrow", "pytest",

@@ -9,8 +9,9 @@ import os
 import socket
 import getpass
 import tempfile
-import pkgutil
 import sys
+import glob
+import importlib
 
 
 def runcmd(cmd):
@@ -34,9 +35,11 @@ def copydir(src, dst):
 
 def findimage(args, dir="images"):
     image = args.img
-    for importer, package, _ in pkgutil.iter_modules([dir]):
-        fullName = '%s.%s' % (dir, package)
-        module = importer.find_module(package).load_module(fullName)
+    for file in glob.glob("%s/*.py" % dir):
+        if "__init__" in file:
+            continue
+        fullName = file.replace("/", ".").replace(".py", "")
+        module = importlib.import_module(fullName)
         imgs = module.images()
         for img in imgs.keys():
             if img == image:
@@ -49,9 +52,11 @@ def findimage(args, dir="images"):
 
 def listimages(dir="images"):
     imgs = []
-    for importer, package, _ in pkgutil.iter_modules([dir]):
-        fullName = '%s.%s' % (dir, package)
-        module = importer.find_module(package).load_module(fullName)
+    for file in glob.glob("%s/*.py" % dir):
+        if "__init__" in file:
+            continue
+        fullName = file.replace("/", ".").replace(".py", "")
+        module = importlib.import_module(fullName)
         imgs += module.images().keys()
     print("List of images supported:")
     for img in imgs:
