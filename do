@@ -212,6 +212,7 @@ class Runner:
         out = subprocess.check_output("df . | tail -n1 | awk '{print $1,$NF}'",
                                       shell=True)
         out = out.rstrip()
+        out = out.decode("UTF-8")
         dirs = out.split(" ")
         tokens = dirs[0].split(":")
         # local mount
