@@ -21,7 +21,7 @@ def emit(writer, **kwargs):
     modules.cuml_dev.emit(writer, **kwargs)
 
 
-rapidsVersion = "0.8"
+rapidsVersion = "0.10"
 ncclVersion = "2.4.7"
 def images():
     return {

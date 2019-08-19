@@ -12,9 +12,12 @@ def emit(writer, **kwargs):
     cudaVersionFull = kwargs["cudaVersionFull"]
     writer.packages(["doxygen", "graphviz", "gzip", "libopenblas-dev",
                      "libpthread-stubs0-dev", "tar", "unzip", "zlib1g-dev"])
-    writer.condaPackages(["boost", "cmake=3.14", "cudf=$rapidsVersion.*", "Cython",
-                          "dask", "distributed", "libclang", "pytest",
-                          "scikit-learn", "umap-learn"],
+    writer.condaPackages(["boost", "cmake=3.14.5", "cudf=$rapidsVersion.*",
+                          "cython", "dask", "dask-cuda=$rapidsVersion.*",
+                          "dask-cudf=$rapidsVersion.*", "dask-ml",
+                          "distributed", "libclang=8.0.0", "libcumlprims=0.9.*",
+                          "numba=0.44*", "pytest", "rmm=$rapidsVersion.*",
+                          "scikit-learn", "statsmodels", "umap-learn"],
                          channels=["anaconda", "numba", "conda-forge",
                                    "nvidia/label/cuda$$CUDA_VERSION_SHORT",
                                    "rapidsai/label/cuda$$CUDA_VERSION_SHORT",
