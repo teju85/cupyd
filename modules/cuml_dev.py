@@ -18,11 +18,8 @@ def emit(writer, **kwargs):
                           "distributed", "libclang=8.0.0", "libcumlprims=0.9.*",
                           "numba=0.44*", "pytest", "rmm=$rapidsVersion.*",
                           "scikit-learn", "statsmodels", "umap-learn"],
-                         channels=["anaconda", "numba", "conda-forge",
-                                   "nvidia/label/cuda$$CUDA_VERSION_SHORT",
-                                   "rapidsai/label/cuda$$CUDA_VERSION_SHORT",
-                                   "rapidsai-nightly/label/cuda$$CUDA_VERSION_SHORT",
-                                   "defaults"],
+                         channels=["rapidsai", "nvidia", "rapidsai-nightly",
+                                   "conda-forge", "defaults"],
                          rapidsVersion=rapidsVersion)
     writer.emit("""ENV CONDA_PREFIX=/opt/conda""")
     major, minor, _, _, _ = modules.cuda.shortVersion(cudaVersionFull)
