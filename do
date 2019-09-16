@@ -115,6 +115,8 @@ def parseargs():
         " uid  ['-u' option to docker. To run on non-privileged containers]")
     parser.add_argument("-security", type=str, default=None,
         help="Same as --security-opt option of docker")
+    parser.add_argument("-nohostname", action="store_true", default=False,
+                        help="Do not pass '-h' option to docker run")
     parser.add_argument("-v", default=[], action="append", type=str,
         help="Volumes to mount. Same syntax as docker run")
     parser.add_argument("cmd", nargs=argparse.REMAINDER,
@@ -256,6 +258,8 @@ class Runner:
         return dns
 
     def __getHostname(self, args):
+        if args.nohostname:
+            return []
         hn = "%s/%s" % (socket.gethostname(), args.img)
         return ["-h", hn]
 

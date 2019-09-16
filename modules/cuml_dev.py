@@ -16,7 +16,7 @@ def emit(writer, **kwargs):
                           "cython", "dask", "dask-cuda=$rapidsVersion.*",
                           "dask-cudf=$rapidsVersion.*", "dask-ml",
                           "distributed", "libclang=8.0.0", "libcumlprims=0.9.*",
-                          "numba=0.44*", "pytest", "rmm=$rapidsVersion.*",
+                          "numba=0.45*", "pytest", "rmm=$rapidsVersion.*",
                           "scikit-learn", "statsmodels", "umap-learn"],
                          channels=["rapidsai", "nvidia", "rapidsai-nightly",
                                    "conda-forge", "defaults"],
