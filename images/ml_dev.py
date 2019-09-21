@@ -22,22 +22,18 @@ def emit(writer, **kwargs):
 
 
 rapidsVersion = "0.10"
-ncclVersion = "2.4.7"
 def images():
     return {
         "ml-dev:9.2": { "cudaVersionFull": "9.2.88",
                         "base": "ubuntu:16.04",
                         "needsContext": True,
-                        "rapidsVersion": rapidsVersion,
-                        "ncclVersion": ncclVersion },
+                        "rapidsVersion": rapidsVersion },
         "ml-dev:10.0": { "cudaVersionFull": "10.0.130",
                          "base": "ubuntu:16.04",
                          "needsContext": True,
-                         "rapidsVersion": rapidsVersion,
-                         "ncclVersion": ncclVersion },
+                         "rapidsVersion": rapidsVersion },
         "ml-dev:10.1": { "cudaVersionFull": "10.1.105",
                          "base": "ubuntu:16.04",
                          "needsContext": True,
-                         "rapidsVersion": rapidsVersion,
-                         "ncclVersion": ncclVersion }
+                         "rapidsVersion": rapidsVersion }
     }
