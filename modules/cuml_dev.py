@@ -9,11 +9,11 @@ def emit(writer, **kwargs):
     writer.condaPackages(["boost", "cmake=3.14.5", "cudf=$rapidsVersion.*",
                           "cython", "dask", "dask-cuda=$rapidsVersion.*",
                           "dask-cudf=$rapidsVersion.*", "dask-ml",
-                          "distributed", "libclang=8.0.0", "libcumlprims=0.9.*",
-                          "nccl>=2.4", "numba=0.45*", "pytest",
-                          "rmm=$rapidsVersion.*", "scikit-learn", "statsmodels",
-                          "umap-learn"],
+                          "distributed", "flake8", "libclang=8.0.0",
+                          "libcumlprims=$rapidsVersion.*", "nccl>=2.4",
+                          "numba=0.45*", "pytest", "rmm=$rapidsVersion.*",
+                          "scikit-learn", "scipy", "statsmodels", "umap-learn"],
                          channels=["rapidsai", "nvidia", "rapidsai-nightly",
-                                   "conda-forge", "defaults"],
+                                   "conda-forge", "anaconda", "defaults"],
                          rapidsVersion=rapidsVersion)
     writer.emit("""ENV CONDA_PREFIX=/opt/conda""")
