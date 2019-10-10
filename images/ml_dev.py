@@ -11,13 +11,11 @@ def emit(writer, **kwargs):
     if "cudaVersionFull" not in kwargs:
         raise Exception("'cudaVersionFull' is mandatory!")
     cudaVersionFull = kwargs["cudaVersionFull"]
-    modules.cuda_dev.emit(writer, cudaVersionFull)
+    modules.cuda_dev.emit(writer, cudaVersionFull, kwargs["base"])
     modules.runas.emit(writer)
     modules.ssh.emit(writer)
     modules.conda_ml_env.emit(writer)
-    modules.openmpi.emit(writer, devBuild=True, m4Version="1.4.18",
-                         autoconfVersion="2.69", automakeVersion="1.16",
-                         libtoolVersion="2.4.6", flexVersion="2.6.4")
+    modules.openmpi.emit(writer, devBuild=False, ompiVersion="4.0.2")
     modules.cuml_dev.emit(writer, **kwargs)
 
 
@@ -35,5 +33,9 @@ def images():
         "ml-dev:10.1": { "cudaVersionFull": "10.1.105",
                          "base": "ubuntu:16.04",
                          "needsContext": True,
-                         "rapidsVersion": rapidsVersion }
+                         "rapidsVersion": rapidsVersion },
+        "ml-dev:10.1-1804": { "cudaVersionFull": "10.1.105",
+                              "base": "ubuntu:18.04",
+                              "needsContext": True,
+                              "rapidsVersion": rapidsVersion }
     }

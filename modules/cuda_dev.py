@@ -2,9 +2,9 @@ import re
 import modules.cuda
 
 
-def emit(writer, cudaVersionFull):
+def emit(writer, cudaVersionFull, baseImage="ubuntu:16.04"):
     major, minor, subminor, versionShort, pkgVersion = modules.cuda.shortVersion(cudaVersionFull)
-    modules.cuda.emit(writer, cudaVersionFull)
+    modules.cuda.emit(writer, cudaVersionFull, baseImage)
     if versionShort == "9.2":
         writer.packages(["cuda-compiler-$pkgVersion",
                          "cuda-cupti-$pkgVersion",
