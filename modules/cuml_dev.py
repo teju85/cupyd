@@ -11,8 +11,9 @@ def emit(writer, **kwargs):
                           "dask-cudf=$rapidsVersion.*", "dask-ml",
                           "distributed", "flake8", "libclang=8.0.0",
                           "libcumlprims=$rapidsVersion.*", "nccl>=2.4",
-                          "numba=0.45*", "pytest", "rmm=$rapidsVersion.*",
-                          "scikit-learn", "scipy", "statsmodels", "umap-learn"],
+                          "numba=0.45*", "protobuf", "pytest",
+                          "rmm=$rapidsVersion.*", "scikit-learn", "scipy",
+                          "statsmodels", "umap-learn"],
                          channels=["rapidsai", "nvidia", "rapidsai-nightly",
                                    "conda-forge", "anaconda", "defaults"],
                          rapidsVersion=rapidsVersion)
