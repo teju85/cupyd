@@ -1,5 +1,6 @@
 import re
 import modules.build_essential
+import multiprocessing
 
 
 def shortVersion(cmakeVersionFull):
@@ -26,9 +27,10 @@ RUN wget --no-check-certificate \\
         "https://cmake.org/files/v$short/cmake-$full.tar.gz" && \\
     tar xf cmake-$full.tar.gz && \\
     cd cmake-$full && \\
-    ./bootstrap --system-curl && \\
+    ./bootstrap --parallel=$ncores --system-curl && \\
     make -j && \\
     make install && \\
     cd .. && \\
     rm -rf cmake-$full.tar.gz cmake-$full""",
-                short=short, full=cmakeVersionFull)
+                short=short, full=cmakeVersionFull,
+                ncores=multiprocessing.cpu_count())

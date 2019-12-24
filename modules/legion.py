@@ -9,8 +9,6 @@ def emit(writer, **kwargs):
     apt-get update -qq && \\
     apt-get install -qq \\
         build-essential git python-pip pypy time wget \\
-        g++-4.8 g++-4.9 g++-5 g++-6 \\
-        gcc-4.9-multilib g++-4.9-multilib \\
         libaio1 \\
         libncurses5-dev \\
         zlib1g-dev \\
@@ -50,7 +48,8 @@ def emit(writer, **kwargs):
     make -j 20 && make install""")
     writer.emit("""RUN git clone https://github.com/StanfordLegion/legion.git \\
         /opt/legion && \\
-    LLVM_CONFIG=llvm-config \\
+    CXX=mpiCC \\
+        LLVM_CONFIG=llvm-config \\
         GASNET=/opt/gasnet/release \\
         CONDUIT=ibv \\
         /opt/legion/language/install.py --rdir=auto --gasnet --cuda""")
