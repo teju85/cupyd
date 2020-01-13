@@ -8,7 +8,9 @@ def emit(writer, **kwargs):
     add-apt-repository ppa:pypy/ppa -y && \\
     apt-get update -qq && \\
     apt-get install -qq \\
-        build-essential git python-pip pypy time wget \\
+        build-essential \\
+        cmake \\
+        git python-pip pypy time wget \\
         libaio1 \\
         libncurses5-dev \\
         zlib1g-dev \\
@@ -45,7 +47,7 @@ def emit(writer, **kwargs):
     mv cfe-3.8.1.src llvm-3.8.1.src/tools/clang && \\
     mkdir llvm-build && cd llvm-build && \\
     ../llvm-3.8.1.src/configure --enable-optimized --disable-assertions --disable-terminfo --disable-libedit --disable-zlib && \\
-    make -j 20 && make install""")
+    make -j && make install""")
     writer.emit("""RUN git clone https://github.com/StanfordLegion/legion.git \\
         /opt/legion && \\
     CXX=mpiCC \\
