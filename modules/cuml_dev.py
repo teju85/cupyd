@@ -1,20 +1,17 @@
-import modules.cuda
+import modules.conda
+import modules.cuda as cuda
 
 def emit(writer, **kwargs):
+    modules.conda.emit(writer)
     if "rapidsVersion" not in kwargs:
         raise Exception("'rapidsVersion' is mandatory!")
-    rapidsVersion = kwargs["rapidsVersion"]
-    writer.packages(["doxygen", "graphviz", "gzip", "libopenblas-dev",
-                     "libpthread-stubs0-dev", "tar", "unzip", "zlib1g-dev"])
-    writer.condaPackages(["boost", "cmake=3.14.5", "cudf=$rapidsVersion.*",
-                          "cython", "dask", "dask-cuda=$rapidsVersion.*",
-                          "dask-cudf=$rapidsVersion.*", "dask-ml",
-                          "distributed", "flake8", "libclang=8.0.0",
-                          "libcumlprims=$rapidsVersion.*", "nccl>=2.4",
-                          "numba=0.45*", "protobuf", "pytest",
-                          "rmm=$rapidsVersion.*", "scikit-learn", "scipy",
-                          "statsmodels", "umap-learn"],
-                         channels=["rapidsai", "nvidia", "rapidsai-nightly",
-                                   "conda-forge", "anaconda", "defaults"],
-                         rapidsVersion=rapidsVersion)
-    writer.emit("""ENV CONDA_PREFIX=/opt/conda""")
+    if "cudaVersionFull" not in kwargs:
+        raise Exception("'cudaVersionFull' is mandatory!")
+    _, _, _, cudaVersionShort, _ = cuda.shortVersion(kwargs["cudaVersionFull"])
+    writer.emit("""RUN wget "https://raw.githubusercontent.com/rapidsai/cuml/branch-$rapidsVersion/conda/environments/cuml_dev_cuda$cudaVersionShort.yml" \\
+        -O cuml_dev.yml && \\
+    conda env create -n cuml_dev -f cuml_dev.yml && \\
+    rm -f cuml_dev.yml && \\
+    conda clean --yes --all""",
+                rapidsVersion=kwargs["rapidsVersion"],
+                cudaVersionShort=cudaVersionShort)
