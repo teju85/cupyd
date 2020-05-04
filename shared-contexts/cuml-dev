@@ -11,7 +11,7 @@ function cumlSrcDir() {
 
 function cumlFixClangFormat() {
     local dir=`cumlSrcDir`
-    if [ "$status" != "0" ]; then
+    if [ "$?" != "0" ]; then
         return 1
     fi
     pushd $dir
@@ -33,12 +33,11 @@ function cumlCmakeCommand() {
 function cumlPyBuild() {
     local cwd=$(basename $(pwd))
     local dir=`cumlSrcDir`
-    if [ "$status" != "0" ]; then
+    if [ "$?" != "0" ]; then
         return 1
     fi
     pushd $dir/python
-    export CUML_BUILD_PATH=../build-cuml/$cwd
-    python setup.py build_ext --inplace
+    env CUML_BUILD_PATH=$cwd python setup.py build_ext --inplace
     popd
 }
 
@@ -54,10 +53,12 @@ function cumlCppTest() {
 function cumlPyTest() {
     local cwd=`pwd`
     local dir=`cumlSrcDir`
-    if [ "$status" != "0" ]; then
+    if [ "$?" != "0" ]; then
         return 1
     fi
     pushd $dir/python
     env LD_LIBRARY_PATH=$cwd:$LD_LIBRARY_PATH py.test -v $*
     popd
 }
+
+source activate cuml_dev
