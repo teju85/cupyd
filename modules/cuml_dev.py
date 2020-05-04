@@ -15,4 +15,4 @@ def emit(writer, **kwargs):
     conda clean --yes --all""",
                 rapidsVersion=kwargs["rapidsVersion"],
                 cudaVersionShort=cudaVersionShort)
-    writer.packages(["libc6-dbg", "gdb", "valgrind"])
+    writer.emit("COPY contexts/cuml-dev /cuml-dev")

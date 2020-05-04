@@ -1,0 +1,63 @@
+
+function cumlSrcDir() {
+    local file="CMakeCache.txt"
+    if [ ! -e "$file" ]; then
+        echo "Error! Not inside cuml cmake build folder!!" 1>&2
+        return 1
+    fi
+    local cppDir=`grep CUML_SOURCE_DIR "$file" | sed -e 's/.*=//'`
+    dirname $cppDir
+}
+
+function cumlFixClangFormat() {
+    local dir=`cumlSrcDir`
+    if [ "$status" != "0" ]; then
+        return 1
+    fi
+    pushd $dir
+    python ./cpp/scripts/run-clang-format.py -inplace
+    local changes=`git status -s`
+    if [ "$changes" != "" ]; then
+        echo "There seem to be clang-format fixes present. Committing them..."
+        git add cpp/ && git commit -m 'FIX clang-format fixes'
+    else
+        echo "No clang-format fixes."
+    fi
+    popd
+}
+
+function cumlCmakeCommand() {
+    time cmake -DBLAS_LIBRARIES=$CONDA_PREFIX/lib/libopenblas.so.0 ../../cuml/cpp
+}
+
+function cumlPyBuild() {
+    local cwd=$(basename $(pwd))
+    local dir=`cumlSrcDir`
+    if [ "$status" != "0" ]; then
+        return 1
+    fi
+    pushd $dir/python
+    export CUML_BUILD_PATH=../build-cuml/$cwd
+    python setup.py build_ext --inplace
+    popd
+}
+
+function cumlCppTest() {
+    local file="CMakeCache.txt"
+    if [ ! -e "$file" ]; then
+        echo "Error! Not inside cuml cmake build folder!!" 1>&2
+        return 1
+    fi
+    ./test/prims && ./test/ml
+}
+
+function cumlPyTest() {
+    local cwd=`pwd`
+    local dir=`cumlSrcDir`
+    if [ "$status" != "0" ]; then
+        return 1
+    fi
+    pushd $dir/python
+    env LD_LIBRARY_PATH=$cwd:$LD_LIBRARY_PATH py.test -v $*
+    popd
+}
