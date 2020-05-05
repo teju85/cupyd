@@ -27,17 +27,23 @@ function cumlFixClangFormat() {
 }
 
 function cumlCmakeCommand() {
-    time cmake -DBLAS_LIBRARIES=$CONDA_PREFIX/lib/libopenblas.so.0 ../../cuml/cpp
+    time cmake \
+         -DBLAS_LIBRARIES=$CONDA_PREFIX/lib/libopenblas.so.0 \
+         -DBUILD_CUML_STD_COMMS=ON \
+         ../../cuml/cpp
 }
 
 function cumlPyBuild() {
-    local cwd=$(basename $(pwd))
+    local cwd=`pwd`
     local dir=`cumlSrcDir`
     if [ "$?" != "0" ]; then
         return 1
     fi
     pushd $dir/python
-    env CUML_BUILD_PATH=$cwd python setup.py build_ext --inplace
+    cp $cwd/comms/std/libcumlcomms.so $cwd
+    env CUML_BUILD_PATH=$cwd \
+        LD_LIBRARY_PATH=$cwd:$LD_LIBRARY_PATH \
+        python setup.py build_ext --inplace
     popd
 }
 
@@ -57,7 +63,8 @@ function cumlPyTest() {
         return 1
     fi
     pushd $dir/python
-    env LD_LIBRARY_PATH=$cwd:$LD_LIBRARY_PATH py.test -v $*
+    env LD_LIBRARY_PATH=$cwd:$LD_LIBRARY_PATH \
+        py.test -v cuml/test
     popd
 }
 
