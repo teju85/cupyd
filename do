@@ -87,8 +87,6 @@ def parseargs():
         help="Copy the temporary build dir into this dir")
     parser.add_argument("-dns", default=[], action="append", type=str,
         help="Pass DNS servers to be used inside container")
-    parser.add_argument("-img", type=str, default=None,
-        help="Image to build/push/pull/launch")
     parser.add_argument("-ipc", default=None, type=str,
         help="how to use shared memory between processes.")
     parser.add_argument("-list", action="store_true", default=False,
@@ -108,7 +106,7 @@ def parseargs():
     parser.add_argument("-run", default=False, action="store_true",
         help="Run the image to launch a container")
     parser.add_argument("-runas", choices=["user", "root", "uid"],
-        default="root", type=str,
+        default="user", type=str,
         help="Run as specified. Default is root. Options: "
         " user [run as current user by switching user inside the container]"
         " root [run as root, without any of these switching abilities]"
@@ -119,6 +117,7 @@ def parseargs():
                         help="Do not pass '-h' option to docker run")
     parser.add_argument("-v", default=[], action="append", type=str,
         help="Volumes to mount. Same syntax as docker run")
+    parser.add_argument("img", type=str, help="Image to build/push/pull/launch")
     parser.add_argument("cmd", nargs=argparse.REMAINDER,
         help="Command to run inside the container")
     args = parser.parse_args()
@@ -183,11 +182,11 @@ class Runner:
         return output
 
     def __getCmd(self, args):
-        arr = self.__get(args.img, "Config", "Cmd")
-        if len(args.cmd) > 0:
+        if args.cmd is None:
+            arr = self.__get(args.img, "Config", "Cmd")
+            cmd = " ".join(arr) if len(arr) > 0 else "/bin/bash"
+        elif len(args.cmd) > 0:
             cmd = " ".join(args.cmd)
-        elif len(arr) > 0:
-            cmd = " ".join(arr)
         else:
             cmd = "/bin/bash"
         # single quotes around to directly pass this command to container!
