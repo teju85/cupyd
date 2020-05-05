@@ -57,6 +57,7 @@ function cumlCppTest() {
 }
 
 function cumlPyTest() {
+    local tests=${1:-cuml/test}
     local cwd=`pwd`
     local dir=`cumlSrcDir`
     if [ "$?" != "0" ]; then
@@ -64,7 +65,7 @@ function cumlPyTest() {
     fi
     pushd $dir/python
     env LD_LIBRARY_PATH=$cwd:$LD_LIBRARY_PATH \
-        py.test -v cuml/test
+        py.test -v $tests
     popd
 }
 
