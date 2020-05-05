@@ -16,3 +16,4 @@ def emit(writer, **kwargs):
                 rapidsVersion=kwargs["rapidsVersion"],
                 cudaVersionShort=cudaVersionShort)
     writer.emit("COPY contexts/cuml-dev /cuml-dev")
+    writer.emit("COPY contexts/raft-dev /raft-dev")
