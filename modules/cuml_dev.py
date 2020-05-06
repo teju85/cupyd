@@ -15,5 +15,6 @@ def emit(writer, **kwargs):
     conda clean --yes --all""",
                 rapidsVersion=kwargs["rapidsVersion"],
                 cudaVersionShort=cudaVersionShort)
+    writer.emit("""RUN /bin/bash -c 'source activate cuml_dev && conda install -c anaconda flake8 && conda clean -ya'""")
     writer.emit("COPY contexts/cuml-dev /cuml-dev")
     writer.emit("COPY contexts/raft-dev /raft-dev")
