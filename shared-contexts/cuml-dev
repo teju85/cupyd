@@ -69,4 +69,15 @@ function cumlPyTest() {
     popd
 }
 
+function cumlFlake8() {
+    local dir=`cumlSrcDir`
+    if [ "$?" != "0" ]; then
+        return 1
+    fi
+    pushd $dir
+    flake8 --exclude=cpp,thirdparty,__init__.py,versioneer.py,python/_external_repositories && \
+        flake8 --config=python/.flake8.cython
+    popd
+}
+
 source activate cuml_dev
