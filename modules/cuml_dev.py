@@ -1,5 +1,6 @@
 import modules.conda
 import modules.cuda as cuda
+import modules.jupyter
 
 def emit(writer, **kwargs):
     modules.conda.emit(writer)
@@ -17,5 +18,6 @@ def emit(writer, **kwargs):
                 cudaVersionShort=cudaVersionShort)
     writer.condaPackages(["flake8", "ipython", "jupyter"], channels=["anaconda"],
                          env="cuml_dev")
+    modules.jupyter.emit(writer, **kwargs)
     writer.emit("COPY contexts/cuml-dev /cuml-dev")
     writer.emit("COPY contexts/raft-dev /raft-dev")
