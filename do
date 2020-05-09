@@ -325,13 +325,15 @@ class Writer:
     rm -rf /var/lib/apt/lists/*"""
         self.emit(str, caller=caller, **kwargs)
 
-    def condaPackages(self, pkgs, channels=[], caller=2, **kwargs):
+    def condaPackages(self, pkgs, channels=[], env=None, caller=2, **kwargs):
         if len(pkgs) <= 0:
             return
         if "installOpts" not in kwargs:
             kwargs["installOpts"] = ""
         ch = "-c " + " -c ".join(channels) + " " if len(channels) > 0 else ""
         str = "RUN conda install $installOpts " + ch
+        if env is not None:
+            str += " -n %s" % env
         for p in pkgs:
             str += "\\\n        %s " % p
         str += """&& \\
