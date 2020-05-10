@@ -11,13 +11,13 @@ def emit(writer, **kwargs):
     _, _, _, cudaVersionShort, _ = cuda.shortVersion(kwargs["cudaVersionFull"])
     writer.emit("""RUN wget "https://raw.githubusercontent.com/rapidsai/cuml/branch-$rapidsVersion/conda/environments/cuml_dev_cuda$cudaVersionShort.yml" \\
         -O cuml_dev.yml && \\
+    echo "- notebook>=0.5.0" >> cuml_dev.yml && \\
+    echo "- flake8" >> cuml_dev.yml && \\
     conda env create -n cuml_dev -f cuml_dev.yml && \\
     rm -f cuml_dev.yml && \\
     conda clean --yes --all""",
                 rapidsVersion=kwargs["rapidsVersion"],
                 cudaVersionShort=cudaVersionShort)
-    writer.condaPackages(["flake8", "ipython", "jupyter"], channels=["anaconda"],
-                         env="cuml_dev")
     modules.jupyter.emit(writer, **kwargs)
     writer.emit("COPY contexts/cuml-dev /cuml-dev")
     writer.emit("COPY contexts/raft-dev /raft-dev")
