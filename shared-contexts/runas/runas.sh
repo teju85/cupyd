@@ -4,7 +4,6 @@
 #  . RUNAS_USER - user name of the user Eg: $USER
 #  . RUNAS_PRE_SWITCH_CMD - run a command before switching user
 
-
 echo "Cmd to run: $*"
 
 # this is the case for '-runas user' inside launch script

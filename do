@@ -83,6 +83,8 @@ def parseargs():
     parser = argparse.ArgumentParser(description=desc)
     parser.add_argument("-build", default=False, action="store_true",
         help="Build the docker image locally first")
+    parser.add_argument("-cap", default=[], action="append",
+        help="Add capabilities to the container at runtime")
     parser.add_argument("-copy", default=None, type=str,
         help="Copy the temporary build dir into this dir")
     parser.add_argument("-dns", default=[], action="append", type=str,
@@ -162,6 +164,7 @@ class Runner:
         finalcmd += self.__getDns(args)
         finalcmd += self.__getHostname(args)
         finalcmd += self.__getHostIp(args)
+        finalcmd += self.__getCapabilities(args)
         if args.privileged:
             finalcmd.append("--privileged")
         if args.ipc is not None:
@@ -278,6 +281,12 @@ class Runner:
             gid = os.getgid()
             out.append("-u %d:%d" % (uid, gid))
             out.append("-e RUNAS_USER=%s" % getpass.getuser())
+        return out
+
+    def __getCapabilities(self, args):
+        out = []
+        for c in args.cap:
+            out.append("--cap-add %s" % c)
         return out
 
 
