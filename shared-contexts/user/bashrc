@@ -1,0 +1,2 @@
+alias e='emacs --no-splash -q -l /opt/user/emacs.el'
+alias ll='ls -l'

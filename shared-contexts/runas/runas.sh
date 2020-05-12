@@ -4,6 +4,10 @@
 #  . RUNAS_USER - user name of the user Eg: $USER
 #  . RUNAS_PRE_SWITCH_CMD - run a command before switching user
 
+function customBashRc() {
+    cat /opt/user/bashrc >> $HOME/.bashrc
+}
+
 echo "Cmd to run: $*"
 
 # this is the case for '-runas user' inside launch script
@@ -18,12 +22,13 @@ if [ "$RUNAS_UID" != "" ] && [ "$RUNAS_USER" != "" ]; then
     chmod 0440 /etc/sudoers.d/$USER
     mkdir -p $HOME
     echo > $HOME/.bashrc
-    env | grep -v -e LS_COLORS -e UID >> $HOME/.bashrc
+    env | grep -v -e LS_COLORS -e UID | sed -e 's/\([^=]*\)=\(.*\)/\1="\2"/' >> $HOME/.bashrc
     ldconfig
     if [ "$RUNAS_PRE_SWITCH_CMD" != "" ]; then
         echo "Pre-switch cmd: $RUNAS_PRE_SWITCH_CMD"
         $RUNAS_PRE_SWITCH_CMD
     fi
+    customBashRc
     exec /opt/runas/exec-as `id -u $USER` `id -g $USER` `pwd` $*
 # this is the case for '-runas root' inside launch script
 elif [ "$RUNAS_UID" = "" ] && [ "$RUNAS_USER" = "" ]; then
@@ -32,6 +37,8 @@ elif [ "$RUNAS_UID" = "" ] && [ "$RUNAS_USER" = "" ]; then
 # this is the case for '-runas uid' inside launch script
 elif [ "$RUNAS_UID" = "" ] && [ "$RUNAS_USER" != "" ]; then
     export USER=$RUNAS_USER
+    export HOME=/tmp
+    customBashRc
 else
     echo "*ERROR* non-nil RUNAS_UID but nil RUNAS_USER is illegal!"
     exit 1
