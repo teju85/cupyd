@@ -6,14 +6,11 @@
 (global-font-lock-mode t)
 (setq indent-tabs-mode nil)
 (show-paren-mode t)
-(mouse-wheel-mode t)
 (blink-cursor-mode t)
 (setq inhibit-startup-message t)
 (setq initial-scratch-message "")
 ;; save the precious screen real estate!
 (menu-bar-mode -1)
-(tool-bar-mode -1)
-(scroll-bar-mode -1)
 ;; page scrolling in line-by-line fashion
 (setq scroll-step 1)
 ;; default settings for language and input methods
@@ -62,6 +59,8 @@
 (add-to-list 'auto-mode-alist '("\\.cmake\\'" . cmake-mode))
 (add-to-list 'auto-mode-alist '("\\.pdf\\'" . doc-view-mode))
 
+(global-unset-key "\C-f")
+(global-unset-key "\C-q")
 (global-set-key "\C-f\C-s" 'replace-string)
 (global-set-key (kbd "M-g") 'goto-line)
 
