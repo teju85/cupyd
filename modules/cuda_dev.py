@@ -40,4 +40,5 @@ def emit(writer, cudaVersionFull, baseImage="ubuntu:16.04"):
         writer.packages(["cuda-nsight-$pkgVersion"], pkgVersion=pkgVersion)
     if float(versionShort) >= 10.0:
         writer.packages(["cuda-nsight-compute-$pkgVersion"], pkgVersion=pkgVersion)
+        writer.packages(["cuda-nsight-systems-$pkgVersion"], pkgVersion=pkgVersion)
     writer.packages(["sudo"])
