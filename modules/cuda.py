@@ -113,7 +113,9 @@ def emit(writer, cudaVersion, baseImage, rcUrl=None):
     # cublas
     if short < 10.1:
         pkgs.append("cuda-cublas-$pkgVersion")
+    elif short < 11.0:
+        pkgs.append("libcublas$major")
     else:
         pkgs.append("libcublas-$pkgVersion")
-    writer.packages(pkgs, pkgVersion=pkgVersion)
+    writer.packages(pkgs, pkgVersion=pkgVersion, major=major)
     emitSetup(writer, cudaVersion)
