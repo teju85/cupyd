@@ -43,8 +43,8 @@ def emitHeader(writer, baseImage, rcUrl=None):
         return
     if osVer == "ubuntu1804":
         _emitHeader1804(writer, osVer)
-        return
-    _emitHeaderOthers(writer, osVer)
+    else:
+        _emitHeaderOthers(writer, osVer)
 
 
 def shortVersion(cudaVersion):
