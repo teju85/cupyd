@@ -14,6 +14,18 @@ RUN curl -fsSL https://developer.download.nvidia.com/compute/cuda/repos/$osVer/x
                 osVer=osVer)
 
 
+def _emitHeaderOthers(writer, osVer):
+    writer.emit("""
+RUN apt-key adv --fetch-keys "http://developer.download.nvidia.com/compute/cuda/repos/$osVer/x86_64/7fa2af80.pub" && \\
+    apt-key adv --export --no-emit-version -a $GPGKEY_FPR | tail -n +5 > cudasign.pub && \\
+    echo "$GPGKEY_SUM  cudasign.pub" | sha256sum -c --strict - && rm cudasign.pub && \\
+    echo "deb http://developer.download.nvidia.com/compute/cuda/repos/$osVer/x86_64 /" > /etc/apt/sources.list.d/cuda.list && \\
+    echo "deb http://developer.download.nvidia.com/compute/machine-learning/repos/$osVer/x86_64 /" > /etc/apt/sources.list.d/nvidia-ml.list""",
+                GPGKEY_SUM=GPGKEY_SUM,
+                GPGKEY_FPR=GPGKEY_FPR,
+                osVer=osVer)
+
+
 def _emitHeaderRC(writer, osVer, rcUrl):
     writer.packages(["ca-certificates", "curl", "gnupg2"])
     writer.emit("""
@@ -32,15 +44,7 @@ def emitHeader(writer, baseImage, rcUrl=None):
     if osVer == "ubuntu1804":
         _emitHeader1804(writer, osVer)
         return
-    writer.emit("""
-RUN apt-key adv --fetch-keys "http://developer.download.nvidia.com/compute/cuda/repos/$osVer/x86_64/7fa2af80.pub" && \\
-    apt-key adv --export --no-emit-version -a $NVIDIA_GPGKEY_FPR | tail -n +5 > cudasign.pub && \\
-    echo "$NVIDIA_GPGKEY_SUM  cudasign.pub" | sha256sum -c --strict - && rm cudasign.pub && \\
-    echo "deb http://developer.download.nvidia.com/compute/cuda/repos/$osVer/x86_64 /" > /etc/apt/sources.list.d/cuda.list && \\
-    echo "deb http://developer.download.nvidia.com/compute/machine-learning/repos/$osVer/x86_64 /" > /etc/apt/sources.list.d/nvidia-ml.list""",
-                NVIDIA_GPGKEY_SUM=GPGKEY_SUM,
-                NVIDIA_GPGKEY_FPR=GPGKEY_FPR,
-                osVer=osVer)
+    _emitHeaderOthers(writer, osVer)
 
 
 def shortVersion(cudaVersion):
