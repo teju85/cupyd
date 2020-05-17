@@ -46,31 +46,9 @@ def shortVersion(cudaVersionFull):
     return major, minor, subminor, versionShort, pkgVersion
 
 
-def emit(writer, cudaVersionFull, baseImage):
+def emitSetup(writer, cudaVersionFull):
     major, minor, subminor, versionShort, pkgVersion = shortVersion(cudaVersionFull)
-    emitHeader(writer, baseImage)
-    writer.emit("ENV CUDA_VERSION $cudaVersionFull", cudaVersionFull=cudaVersionFull)
-    short = float(versionShort)
-    if short < 10.1:
-        cublas = "cuda-cublas-$pkgVersion"
-    else:
-        cublas = "libcublas%s=%s.0.%s-1" % (major, versionShort, subminor)
-    pkgs = [cublas,
-            "cuda-cudart-$pkgVersion",
-            "cuda-cufft-$pkgVersion",
-            "cuda-curand-$pkgVersion",
-            "cuda-cusolver-$pkgVersion",
-            "cuda-cusparse-$pkgVersion",
-            "cuda-npp-$pkgVersion",
-            "cuda-nvgraph-$pkgVersion",
-            "cuda-nvrtc-$pkgVersion"]
-    if short >= 10.1:
-        pkgs.append("cuda-cupti-$pkgVersion")
-        pkgs.append("cuda-compiler-$pkgVersion")
-        pkgs.append("cuda-cudart-dev-$pkgVersion")
-        pkgs.append("cuda-nvcc-$pkgVersion")
-    writer.packages(pkgs, pkgVersion=pkgVersion)
-    writer.emit("RUN ln -s cuda-$versionShort /usr/local/cuda""", versionShort=versionShort)
+    writer.emit("RUN ln -s cuda-$versionShort /usr/local/cuda", versionShort=versionShort)
     writer.emit("""RUN echo "/usr/local/cuda/lib64" >> /etc/ld.so.conf.d/cuda.conf && \\
     echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf && \\
     echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf && \\
@@ -89,3 +67,30 @@ ENV NVIDIA_REQUIRE_CUDA "cuda>=$versionShort"
 """,
          cudaVersionFull=cudaVersionFull,
          versionShort=versionShort)
+
+
+def emit(writer, cudaVersionFull, baseImage):
+    major, minor, subminor, versionShort, pkgVersion = shortVersion(cudaVersionFull)
+    emitHeader(writer, baseImage)
+    writer.emit("ENV CUDA_VERSION $cudaVersionFull", cudaVersionFull=cudaVersionFull)
+    if pkgVersion != "":
+        pkgVersion = "-" + pkgVersion
+    pkgs = [
+        "cuda-cudart$pkgVersion",
+        "cuda-cufft$pkgVersion",
+        "cuda-curand$pkgVersion",
+        "cuda-cusolver$pkgVersion",
+        "cuda-cusparse$pkgVersion",
+        "cuda-npp$pkgVersion",
+        "cuda-nvgraph$pkgVersion",
+        "cuda-nvrtc$pkgVersion"
+    ]
+    short = float(versionShort)
+    if short < 10.1:
+        pkgs.append("cuda-cublas$pkgVersion")
+        tmpVersion = ""
+    else:
+        tmpVersion = "%s=%s.0.%s-1" % (major, versionShort, subminor)
+        pkgs.append("libcublas$tmpVersion")
+    writer.packages(pkgs, pkgVersion=pkgVersion, tmpVersion=tmpVersion)
+    emitSetup(writer, cudaVersionFull)
