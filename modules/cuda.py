@@ -14,10 +14,21 @@ RUN curl -fsSL https://developer.download.nvidia.com/compute/cuda/repos/$osVer/x
                 osVer=osVer)
 
 
-def emitHeader(writer, baseImage):
+def _emitHeaderRC(writer, osVer, rcUrl):
+    writer.packages(["ca-certificates", "curl", "gnupg2"])
+    writer.emit("""
+RUN curl -fsSL $rcUrl/$osVer/x86_64/7fa2af80.pub | apt-key add - && \\
+    echo "deb $rcUrl/$osVer/x86_64 /" > /etc/apt/sources.list.d/cuda.list""",
+                osVer=osVer, rcUrl=rcUrl)
+
+
+def emitHeader(writer, baseImage, rcUrl=None):
     writer.emit("LABEL maintainer=\"NVIDIA CORPORATION <cudatools@nvidia.com>\"")
     osVer = re.sub(":", "", baseImage)
     osVer = re.sub("[.]", "", osVer)
+    if rcUrl is not None:
+        _emitHeaderRC(writer, osVer, rcUrl)
+        return
     if osVer == "ubuntu1804":
         _emitHeader1804(writer, osVer)
         return
@@ -69,28 +80,46 @@ ENV NVIDIA_REQUIRE_CUDA "cuda>=$versionShort"
          versionShort=versionShort)
 
 
-def emit(writer, cudaVersionFull, baseImage):
+def emit(writer, cudaVersionFull, baseImage, rcUrl=None):
     major, minor, subminor, versionShort, pkgVersion = shortVersion(cudaVersionFull)
-    emitHeader(writer, baseImage)
+    emitHeader(writer, baseImage, rcUrl)
     writer.emit("ENV CUDA_VERSION $cudaVersionFull", cudaVersionFull=cudaVersionFull)
     if pkgVersion != "":
         pkgVersion = "-" + pkgVersion
+    if rcUrl is not None:
+        pkgVersion = "-%s-%s" % (major, minor)
     pkgs = [
         "cuda-cudart$pkgVersion",
-        "cuda-cufft$pkgVersion",
-        "cuda-curand$pkgVersion",
-        "cuda-cusolver$pkgVersion",
-        "cuda-cusparse$pkgVersion",
-        "cuda-npp$pkgVersion",
-        "cuda-nvgraph$pkgVersion",
         "cuda-nvrtc$pkgVersion"
     ]
     short = float(versionShort)
+    # math libraries
+    if short < 11.0:
+        pkgs += [
+            "cuda-cufft$pkgVersion",
+            "cuda-curand$pkgVersion",
+            "cuda-cusolver$pkgVersion",
+            "cuda-cusparse$pkgVersion",
+            "cuda-npp$pkgVersion",
+            "cuda-nvgraph$pkgVersion",
+        ]
+    else:
+        pkgs += [
+            "libcufft$pkgVersion",
+            "libcurand$pkgVersion",
+            "libcusolver$pkgVersion",
+            "libcusparse$pkgVersion",
+            "libnpp$pkgVersion",
+        ]
+    # cublas
     if short < 10.1:
         pkgs.append("cuda-cublas$pkgVersion")
         cublasVersion = ""
     else:
-        cublasVersion = "%s=%s.0.%s-1" % (major, versionShort, subminor)
+        if rcUrl is not None:
+            cublasVersion = pkgVersion
+        else:
+            cublasVersion = "%s=%s.0.%s-1" % (major, versionShort, subminor)
         pkgs.append("libcublas$cublasVersion")
     writer.packages(pkgs, pkgVersion=pkgVersion, cublasVersion=cublasVersion)
     emitSetup(writer, cudaVersionFull)

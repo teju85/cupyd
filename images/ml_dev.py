@@ -3,6 +3,8 @@ import modules.dev_env
 import modules.cuml_dev
 import modules.cuda
 import modules.cuda_dev
+import os
+import json
 
 
 def emit(writer, **kwargs):
@@ -10,7 +12,10 @@ def emit(writer, **kwargs):
         raise Exception("'cudaVersionFull' is mandatory!")
     if "base" not in kwargs:
         raise Exception("'base' is mandatory!")
-    modules.cuda_dev.emit(writer, kwargs["cudaVersionFull"], kwargs["base"])
+    if "rcUrl" not in kwargs:
+        kwargs["rcUrl"] = None
+    modules.cuda_dev.emit(writer, kwargs["cudaVersionFull"], kwargs["base"],
+                          kwargs["rcUrl"])
     modules.cuml_dev.emit(writer, **kwargs)
     modules.dev_env.emit(writer, **kwargs)
 
@@ -30,4 +35,10 @@ def images():
                 "needsContext": True,
                 "rapidsVersion": rapidsVersion,
             }
+    rcFile = os.getenv("RC_FILE", default=None)
+    if rcFile is not None:
+        with open(rcFile) as fp:
+            data = json.load(fp)
+            for img in data.keys():
+                imgs[img] = data[img]
     return imgs
