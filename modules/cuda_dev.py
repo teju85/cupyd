@@ -44,9 +44,9 @@ def emit(writer, cudaVersionFull, baseImage="ubuntu:16.04"):
     # cublas
     if short < 10.1:
         pkgs.append("cuda-cublas-dev$pkgVersion")
-        tmpVersion = ""
+        cublasVersion = ""
     else:
-        tmpVersion = "=%s.0.%s-1" % (versionShort, subminor)
-        pkgs.append("libcublas-dev$tmpVersion")
-    writer.packages(pkgs, pkgVersion=pkgVersion, tmpVersion=tmpVersion,
+        cublasVersion = "=%s.0.%s-1" % (versionShort, subminor)
+        pkgs.append("libcublas-dev$cublasVersion")
+    writer.packages(pkgs, pkgVersion=pkgVersion, cublasVersion=cublasVersion,
                     installOpts="--allow-downgrades")
