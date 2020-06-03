@@ -10,7 +10,7 @@ def emit(writer, **kwargs):
     modules.dev_env.emit(writer, **kwargs)
     _, _, versionShort, pkgVersion = modules.cuda.shortVersion(cudaVersion)
     short = float(versionShort)
-    pkgs = []
+    pkgs = ["zlib1g-dev"]
     if short >= 10.0:
         pkgs += [
             "cuda-nsight-compute-$pkgVersion",
