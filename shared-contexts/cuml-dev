@@ -26,6 +26,17 @@ function cumlFixClangFormat() {
     popd
 }
 
+function cumlClangTidy() {
+    local cwd=`pwd`
+    local dir=`cumlSrcDir`
+    if [ "$?" != "0" ]; then
+        return 1
+    fi
+    pushd $dir
+    python ./cpp/scripts/run-clang-tidy.py -cdb $cwd/compile_commands.json
+    popd
+}
+
 function cumlCmakeCommand() {
     time cmake \
          -DBLAS_LIBRARIES=$CONDA_PREFIX/lib/libopenblas.so.0 \
@@ -33,18 +44,8 @@ function cumlCmakeCommand() {
          ../../cuml/cpp
 }
 
-function cumlPyBuild() {
-    local cwd=`pwd`
-    local dir=`cumlSrcDir`
-    if [ "$?" != "0" ]; then
-        return 1
-    fi
-    pushd $dir/python
-    cp $cwd/comms/std/libcumlcomms.so $cwd
-    env CUML_BUILD_PATH=$cwd \
-        LD_LIBRARY_PATH=$cwd:$LD_LIBRARY_PATH \
-        python setup.py build_ext --inplace
-    popd
+function cumlCppBuild() {
+    make -j $*
 }
 
 function cumlCppTest() {
@@ -54,6 +55,21 @@ function cumlCppTest() {
         return 1
     fi
     ./test/prims && ./test/ml
+}
+
+function cumlPyBuild() {
+    local opts=$*
+    local cwd=`pwd`
+    local dir=`cumlSrcDir`
+    if [ "$?" != "0" ]; then
+        return 1
+    fi
+    pushd $dir/python
+    cp $cwd/comms/std/libcumlcomms.so $cwd
+    env CUML_BUILD_PATH=$cwd \
+        LD_LIBRARY_PATH=$cwd:$LD_LIBRARY_PATH \
+        python setup.py build_ext --inplace $opts
+    popd
 }
 
 function cumlPyTest() {
