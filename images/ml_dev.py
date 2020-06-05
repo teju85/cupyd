@@ -20,7 +20,7 @@ def emit(writer, **kwargs):
     modules.dev_env.emit(writer, **kwargs)
 
 
-rapidsVersion = "0.14"
+rapidsVersion = "0.15"
 def images():
     imgs = {}
     for osVer in ["16.04", "18.04"]:
