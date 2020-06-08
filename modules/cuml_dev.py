@@ -17,6 +17,7 @@ def emit(writer, **kwargs):
         -O cuml_dev.yml && \\
     echo "- notebook>=0.5.0" >> cuml_dev.yml && \\
     echo "- flake8" >> cuml_dev.yml && \\
+    echo "- matplotlib" >> cuml_dev.yml && \\
     conda env create -n cuml_dev -f cuml_dev.yml && \\
     rm -f cuml_dev.yml && \\
     conda clean --yes --all""",
