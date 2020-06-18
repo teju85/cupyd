@@ -37,7 +37,9 @@ function dglPyBuild() {
         return 1
     fi
     pushd $dir/python
-    python setup.py install $opts
+    env LD_LIBRARY_PATH=$cwd:$LD_LIBRARY_PATH \
+        DGL_LIBRARY_PATH=$cwd \
+        python setup.py install $opts
     popd
 }
 
@@ -53,3 +55,5 @@ function dglPyBuild() {
 #         py.test -v $tests
 #     popd
 # }
+
+export DGLBACKEND=pytorch
