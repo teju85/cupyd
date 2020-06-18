@@ -5,13 +5,13 @@ function dglSrcDir() {
         echo "Error! Not inside dgl cmake build folder!!" 1>&2
         return 1
     fi
-    local cppDir=`grep DGL_SOURCE_DIR "$file" | sed -e 's/.*=//'`
-    dirname $cppDir
+    grep dgl_SOURCE_DIR "$file" | sed -e 's/.*=//'
 }
 
 function dglCmakeCommand() {
     time cmake \
          -DUSE_CUDA=ON \
+         -DBUILD_CPP_TEST=ON \
          $* \
          ../../dgl
 }
@@ -20,14 +20,14 @@ function dglCppBuild() {
     time make -j $*
 }
 
-# function dglCppTest() {
-#     local file="CMakeCache.txt"
-#     if [ ! -e "$file" ]; then
-#         echo "Error! Not inside dgl cmake build folder!!" 1>&2
-#         return 1
-#     fi
-#     ./test/prims && ./test/ml
-# }
+function dglCppTest() {
+    local file="CMakeCache.txt"
+    if [ ! -e "$file" ]; then
+        echo "Error! Not inside dgl cmake build folder!!" 1>&2
+        return 1
+    fi
+    ./runUnitTests $*
+}
 
 function dglPyBuild() {
     local opts=$*

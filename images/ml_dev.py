@@ -3,8 +3,7 @@ import modules.dev_env
 import modules.cuml_dev
 import modules.cuda
 import modules.cuda_dev
-import os
-import json
+import modules.internal
 
 
 def emit(writer, **kwargs):
@@ -35,10 +34,5 @@ def images():
                 "needsContext": True,
                 "rapidsVersion": rapidsVersion,
             }
-    rcFile = os.getenv("RC_FILE", default=None)
-    if rcFile is not None:
-        with open(rcFile) as fp:
-            data = json.load(fp)
-            for img in data.keys():
-                imgs[img] = data[img]
+    imgs.update(modules.internal.read_rc())
     return imgs
