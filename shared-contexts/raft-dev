@@ -26,8 +26,32 @@ function raftFixClangFormat() {
     popd
 }
 
+function raftClangTidy() {
+    local cwd=`pwd`
+    local dir=`raftSrcDir`
+    if [ "$?" != "0" ]; then
+        return 1
+    fi
+    pushd $dir
+    python ./cpp/scripts/run-clang-tidy.py -cdb $cwd/compile_commands.json
+    popd
+}
+
 function raftCmakeCommand() {
     time cmake ../../raft/cpp
+}
+
+function raftCppBuild() {
+    time make -j $*
+}
+
+function raftCppTest() {
+    local file="CMakeCache.txt"
+    if [ ! -e "$file" ]; then
+        echo "Error! Not inside raft cmake build folder!!" 1>&2
+        return 1
+    fi
+    ./test_raft
 }
 
 function raftPyBuild() {
@@ -39,15 +63,6 @@ function raftPyBuild() {
     pushd $dir/python
     env RAFT_BUILD_PATH=$cwd python setup.py build_ext --inplace
     popd
-}
-
-function raftCppTest() {
-    local file="CMakeCache.txt"
-    if [ ! -e "$file" ]; then
-        echo "Error! Not inside raft cmake build folder!!" 1>&2
-        return 1
-    fi
-    ./test_raft
 }
 
 function raftPyTest() {
