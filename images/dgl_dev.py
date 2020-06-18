@@ -16,9 +16,14 @@ def emit(writer, **kwargs):
         kwargs["rcUrl"] = None
     modules.cuda_dev.emit(writer, kwargs["cudaVersion"], kwargs["base"],
                           kwargs["rcUrl"])
+    # writer.packages(["libz-dev", "libxml2-dev", "libopenblas-dev",
+    #                  "libopencv-dev", "graphviz", "graphviz-dev",
+    #                  "libgraphviz-dev", "ca-certificates", "unzip"])
     modules.conda.emit(writer)
-    writer.condaPackages(["cmake", "cudatoolkit=$cudaVersion", "nltk",
-                          "notebook", "pytorch", "torchvision"],
+    writer.condaPackages(["cmake", "cudatoolkit=$cudaVersion", "cython",
+                          "networkx", "nltk", "notebook", "numpy",
+                          "matplotlib", "pandas", "pytorch", "requests",
+                          "scipy", "torchvision"],
                          channels=["pytorch"], cudaVersion=cudaVersion)
     modules.jupyter.emit(writer, **kwargs)
     modules.dev_env.emit(writer, **kwargs)
