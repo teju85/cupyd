@@ -1,0 +1,55 @@
+
+function dglSrcDir() {
+    local file="CMakeCache.txt"
+    if [ ! -e "$file" ]; then
+        echo "Error! Not inside dgl cmake build folder!!" 1>&2
+        return 1
+    fi
+    local cppDir=`grep DGL_SOURCE_DIR "$file" | sed -e 's/.*=//'`
+    dirname $cppDir
+}
+
+function dglCmakeCommand() {
+    time cmake \
+         -DUSE_CUDA=ON \
+         $* \
+         ../../dgl
+}
+
+function dglCppBuild() {
+    time make -j $*
+}
+
+# function dglCppTest() {
+#     local file="CMakeCache.txt"
+#     if [ ! -e "$file" ]; then
+#         echo "Error! Not inside dgl cmake build folder!!" 1>&2
+#         return 1
+#     fi
+#     ./test/prims && ./test/ml
+# }
+
+function dglPyBuild() {
+    local opts=$*
+    local cwd=`pwd`
+    local dir=`dglSrcDir`
+    if [ "$?" != "0" ]; then
+        return 1
+    fi
+    pushd $dir/python
+    python setup.py install $opts
+    popd
+}
+
+# function dglPyTest() {
+#     local tests=${1:-dgl/test}
+#     local cwd=`pwd`
+#     local dir=`dglSrcDir`
+#     if [ "$?" != "0" ]; then
+#         return 1
+#     fi
+#     pushd $dir/python
+#     env LD_LIBRARY_PATH=$cwd:$LD_LIBRARY_PATH \
+#         py.test -v $tests
+#     popd
+# }
