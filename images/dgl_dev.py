@@ -23,10 +23,14 @@ def emit(writer, **kwargs):
     writer.condaPackages(["cmake", "cudatoolkit=$cudaVersion", "cython",
                           "networkx", "nltk", "notebook", "numpy",
                           "matplotlib", "pandas", "pytorch", "requests",
-                          "scipy", "torchvision"],
+                          "scipy", "scikit-learn", "torchvision", "urllib3"],
                          channels=["pytorch"], cudaVersion=cudaVersion)
     modules.jupyter.emit(writer, **kwargs)
     modules.dev_env.emit(writer, **kwargs)
+    writer.emit("""RUN git clone https://github.com/snap-stanford/ogb /opt/ogb && \\
+    cd /opt/ogb && \\
+    python setup.py install && \\
+    rm -rf /opt/ogb""")
     writer.emit("COPY contexts/dgl-dev /dgl-dev")
 
 
