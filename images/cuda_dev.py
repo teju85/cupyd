@@ -22,7 +22,7 @@ def emit(writer, **kwargs):
 
 def images():
     return {
-        "cunet-dev:1804-102": {
+        "cuda-dev:1804-102": {
             "cudaVersion": "10.2",
             "base": "nvidia/cuda:10.2-cudnn7-devel-ubuntu18.04",
             "needsContext": True,
