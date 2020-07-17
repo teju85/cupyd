@@ -30,7 +30,7 @@ def images():
             imgs[imgName] = {
                 "cudaVersion": cudaVer,
                 "base": "ubuntu:%s" % osVer,
-                "needsContext": False,
+                "needsContext": True,
             }
     imgs.update(modules.internal.read_rc())
     return imgs
