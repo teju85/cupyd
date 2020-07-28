@@ -119,7 +119,8 @@ def parseargs():
         help="Pass '-h' option to docker run")
     parser.add_argument("-v", default=[], action="append", type=str,
         help="Volumes to mount. Same syntax as docker run")
-    parser.add_argument("img", type=str, help="Image to build/push/pull/launch")
+    parser.add_argument("img", type=str, nargs="?",
+        help="Image to build/push/pull/run")
     parser.add_argument("cmd", nargs=argparse.REMAINDER,
         help="Command to run inside the container")
     args = parser.parse_args()
