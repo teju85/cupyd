@@ -64,6 +64,8 @@ def listimages(dir="images"):
 
 
 def validateargs(args):
+    if not args.list and args.img is None:
+        raise Exception("'img' is mandatory if '-list' is not passed!")
     if args.build and args.pull:
         raise Exception("Cannot pass both '-build' and '-pull'!")
     if args.pull and args.push:
@@ -72,8 +74,6 @@ def validateargs(args):
         raise Exception("'-image' is needed with '-build'!")
     if args.copy and not args.build:
         raise Exception("'-copy' is meaningful only with '-build'!")
-    if not args.list and args.img is None:
-        raise Exception("'-img' is mandatory if '-list' is not passed!")
     if not args.list:
         args.module, args.imgArgs = findimage(args)
 
