@@ -103,7 +103,7 @@ def parseargs():
         help="Pull the image first from a remote registry.")
     parser.add_argument("-push", action="store_true", default=False,
         help="Push the local image to a remote registry.")
-    parser.add_argument("-repo", default="nvcr.io/nvidian_general/teju85-",
+    parser.add_argument("-repo", default="nvcr.io/nvidian/dt-compute/teju85-",
         type=str, help="Remote registry prefix to pull/push this image from/to")
     parser.add_argument("-run", default=False, action="store_true",
         help="Run the image to launch a container")
