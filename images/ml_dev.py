@@ -22,7 +22,7 @@ def emit(writer, **kwargs):
 rapidsVersion = "0.15"
 def images():
     imgs = {}
-    for osVer in ["16.04", "18.04"]:
+    for osVer in ["18.04"]:
         verStr = osVer.replace(".", "")
         for cudaVer in ["10.1", "10.2", "11.0"]:
             _, _, short, _ = modules.cuda.shortVersion(cudaVer)
