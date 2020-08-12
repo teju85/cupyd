@@ -41,7 +41,8 @@ function cumlCmakeCommand() {
     time cmake \
          -DBLAS_LIBRARIES=$CONDA_PREFIX/lib/libopenblas.so.0 \
          -DBUILD_CUML_STD_COMMS=ON \
-         ../../cuml/cpp
+         ../../cuml/cpp \
+         $*
 }
 
 function cumlCppBuild() {

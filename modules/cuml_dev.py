@@ -10,18 +10,20 @@ def emit(writer, **kwargs):
         raise Exception("'cudaVersion' is mandatory!")
     _, _, cudaVersionShort, _ = cuda.shortVersion(kwargs["cudaVersion"])
     short = float(cudaVersionShort)
+    repo = "rapidsai"
+    branch = "branch-" + kwargs["rapidsVersion"]
     # HACK!
     if short >= 11.0:
-        cudaVersionShort = "10.2"
-    writer.emit("""RUN wget "https://raw.githubusercontent.com/rapidsai/cuml/branch-$rapidsVersion/conda/environments/cuml_dev_cuda$cudaVersionShort.yml" \\
+        #cudaVersionShort = "10.2"
+        repo = "teju85"
+        branch = "fea-ext-cuda11-conda-env"
+    writer.emit("""RUN wget "https://raw.githubusercontent.com/$repo/cuml/$branch/conda/environments/cuml_dev_cuda$cudaVersionShort.yml" \\
         -O cuml_dev.yml && \\
-    echo "- notebook>=0.5.0" >> cuml_dev.yml && \\
-    echo "- flake8" >> cuml_dev.yml && \\
-    echo "- matplotlib" >> cuml_dev.yml && \\
     conda env create -n cuml_dev -f cuml_dev.yml && \\
     rm -f cuml_dev.yml && \\
     conda clean --yes --all""",
-                rapidsVersion=kwargs["rapidsVersion"],
+                repo=repo,
+                branch=branch,
                 cudaVersionShort=cudaVersionShort)
     modules.jupyter.emit(writer, **kwargs)
     writer.emit("COPY contexts/cuml-dev /cuml-dev")
