@@ -89,6 +89,10 @@ def parseargs():
         help="Copy the temporary build dir into this dir")
     parser.add_argument("-dns", default=[], action="append", type=str,
         help="Pass DNS servers to be used inside container")
+    parser.add_argument("-env", default=[], action="append", type=str,
+        help="Pass environmental variables to be used inside container")
+    parser.add_argument("-hostname", action="store_true", default=False,
+        help="Pass '-h' option to docker run")
     parser.add_argument("-ipc", default=None, type=str,
         help="how to use shared memory between processes.")
     parser.add_argument("-list", action="store_true", default=False,
@@ -115,8 +119,6 @@ def parseargs():
         " uid  ['-u' option to docker. To run on non-privileged containers]")
     parser.add_argument("-security", type=str, default=None,
         help="Same as --security-opt option of docker")
-    parser.add_argument("-hostname", action="store_true", default=False,
-        help="Pass '-h' option to docker run")
     parser.add_argument("-v", default=[], action="append", type=str,
         help="Volumes to mount. Same syntax as docker run")
     parser.add_argument("img", type=str, nargs="?",
@@ -166,6 +168,7 @@ class Runner:
         finalcmd += self.__getHostname(args)
         finalcmd += self.__getHostIp(args)
         finalcmd += self.__getCapabilities(args)
+        finalcmd += self.__getEnvVars(args)
         if args.privileged:
             finalcmd.append("--privileged")
         if args.ipc is not None:
@@ -288,6 +291,12 @@ class Runner:
         out = []
         for c in args.cap:
             out.append("--cap-add %s" % c)
+        return out
+
+    def __getEnvVars(self, args):
+        out = []
+        for e in args.env:
+            out.append("-e %s" % e)
         return out
 
 
