@@ -15,7 +15,7 @@ function cumlFixClangFormat() {
         return 1
     fi
     pushd $dir
-    python ./cpp/scripts/run-clang-format.py -inplace
+    time python ./cpp/scripts/run-clang-format.py -inplace
     local changes=`git status -s`
     if [ "$changes" != "" ]; then
         echo "There seem to be clang-format fixes present. Committing them..."
@@ -33,16 +33,14 @@ function cumlClangTidy() {
         return 1
     fi
     pushd $dir
-    python ./cpp/scripts/run-clang-tidy.py -cdb $cwd/compile_commands.json
+    time python ./cpp/scripts/run-clang-tidy.py -cdb $cwd/compile_commands.json
     popd
 }
 
 function cumlCmakeCommand() {
     time cmake \
-         -DBLAS_LIBRARIES=$CONDA_PREFIX/lib/libopenblas.so.0 \
-         -DBUILD_CUML_STD_COMMS=ON \
-         ../../cuml/cpp \
-         $*
+            -DBLAS_LIBRARIES=$CONDA_PREFIX/lib/libopenblas.so.0 \
+            $*
 }
 
 function cumlCppBuild() {
@@ -55,7 +53,7 @@ function cumlCppTest() {
         echo "Error! Not inside cuml cmake build folder!!" 1>&2
         return 1
     fi
-    ./test/prims && ./test/ml
+    time ./test/prims && time ./test/ml
 }
 
 function cumlPyBuild() {
@@ -69,7 +67,7 @@ function cumlPyBuild() {
     cp $cwd/comms/std/libcumlcomms.so $cwd
     env CUML_BUILD_PATH=$cwd \
         LD_LIBRARY_PATH=$cwd:$LD_LIBRARY_PATH \
-        python setup.py build_ext --inplace $opts
+        time python setup.py build_ext --inplace $opts
     popd
 }
 
@@ -82,7 +80,7 @@ function cumlPyTest() {
     fi
     pushd $dir/python
     env LD_LIBRARY_PATH=$cwd:$LD_LIBRARY_PATH \
-        py.test -v $tests
+        time py.test -v $tests
     popd
 }
 

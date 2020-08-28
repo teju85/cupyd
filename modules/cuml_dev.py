@@ -12,11 +12,6 @@ def emit(writer, **kwargs):
     short = float(cudaVersionShort)
     repo = "rapidsai"
     branch = "branch-" + kwargs["rapidsVersion"]
-    # HACK!
-    if short >= 11.0:
-        #cudaVersionShort = "10.2"
-        repo = "teju85"
-        branch = "fea-ext-cuda11-conda-env"
     writer.emit("""RUN wget "https://raw.githubusercontent.com/$repo/cuml/$branch/conda/environments/cuml_dev_cuda$cudaVersionShort.yml" \\
         -O cuml_dev.yml && \\
     conda env create -n cuml_dev -f cuml_dev.yml && \\
