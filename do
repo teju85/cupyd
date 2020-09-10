@@ -91,6 +91,8 @@ def parseargs():
         help="Pass DNS servers to be used inside container")
     parser.add_argument("-env", default=[], action="append", type=str,
         help="Pass environmental variables to be used inside container")
+    parser.add_argument("-gdb", default=False, action="store_true",
+        help="Enable ptrace capability needed for gdb sessions")
     parser.add_argument("-hostname", action="store_true", default=False,
         help="Pass '-h' option to docker run")
     parser.add_argument("-ipc", default=None, type=str,
@@ -175,6 +177,9 @@ class Runner:
             finalcmd += ["--ipc=%s" % args.ipc]
         if args.security is not None:
             finalcmd += ["--security-opt=\"%s\"" % args.security]
+        if args.gdb:
+            finalcmd += ["--cap-add=SYS_PTRACE", "--security-opt",
+                         "seccomp=unconfined"]
         finalcmd.append(args.img)
         finalcmd += self.__getCmd(args)
         dockercmd("run", *finalcmd)
