@@ -64,10 +64,7 @@ function cumlPyBuild() {
         return 1
     fi
     pushd $dir/python
-    cp $cwd/comms/std/libcumlcomms.so $cwd
-    env CUML_BUILD_PATH=$cwd \
-        LD_LIBRARY_PATH=$cwd:$LD_LIBRARY_PATH \
-        time python setup.py build_ext --inplace $opts
+    time python setup.py build_ext --inplace $opts
     popd
 }
 
@@ -79,8 +76,7 @@ function cumlPyTest() {
         return 1
     fi
     pushd $dir/python
-    env LD_LIBRARY_PATH=$cwd:$LD_LIBRARY_PATH \
-        time py.test -v $tests
+    time py.test -v $tests
     popd
 }
 
@@ -96,3 +92,6 @@ function cumlFlake8() {
 }
 
 source activate cuml_dev
+export CUML_BUILD_PATH=`pwd`   # current dir is assumed to be the cmake build path!!
+export LD_LIBRARY_PATH=$CUML_BUILD_PATH:$LD_LIBRARY_PATH
+export PYTHONPATH=`cumlSrcDir`/python
