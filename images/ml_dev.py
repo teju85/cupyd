@@ -24,7 +24,7 @@ def images():
     imgs = {}
     for osVer in ["18.04"]:
         verStr = osVer.replace(".", "")
-        for cudaVer in ["10.1", "10.2", "11.0"]:
+        for cudaVer in ["10.2", "11.0", "11.1"]:
             _, _, short, _ = modules.cuda.shortVersion(cudaVer)
             short = short.replace(".", "")
             imgName = "ml-dev:%s-%s" % (verStr, short)
