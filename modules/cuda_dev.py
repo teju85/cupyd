@@ -2,7 +2,7 @@ import re
 import modules.cuda
 
 
-def emit(writer, cudaVersion, baseImage="ubuntu:16.04", rcUrl=None):
+def emit(writer, cudaVersion, baseImage="ubuntu:18.04", rcUrl=None):
     major, minor, versionShort, pkgVersion = modules.cuda.shortVersion(cudaVersion)
     modules.cuda.emit(writer, cudaVersion, baseImage, rcUrl)
     pkgs = [
