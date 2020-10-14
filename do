@@ -99,6 +99,8 @@ def parseargs():
         help="how to use shared memory between processes.")
     parser.add_argument("-list", action="store_true", default=False,
         help="List all images supported")
+    parser.add_argument("-noExposePorts", action="store_true", default=False,
+        help="Do not expose ports to the host machine")
     parser.add_argument("-onlycopy", action="store_true", default=False,
         help="Only copy the Dockerfile folder")
     parser.add_argument("-printComments", action="store_true", default=False,
@@ -163,7 +165,8 @@ class Runner:
     def run(self):
         args = self.args
         finalcmd = ["-it", "--rm", "--runtime", "nvidia"]
-        finalcmd += self.__getPort(args.img)
+        if not args.noExposePorts:
+            finalcmd += self.__getPort(args.img)
         finalcmd += self.__getVols(args)
         finalcmd += self.__getUser(args)
         finalcmd += self.__getDns(args)
