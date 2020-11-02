@@ -27,18 +27,19 @@ function raftFixClangFormat() {
 }
 
 function raftClangTidy() {
+    local args=$*
     local cwd=`pwd`
     local dir=`raftSrcDir`
     if [ "$?" != "0" ]; then
         return 1
     fi
     pushd $dir
-    python ./cpp/scripts/run-clang-tidy.py -cdb $cwd/compile_commands.json
+    python ./cpp/scripts/run-clang-tidy.py -cdb $cwd/compile_commands.json $args
     popd
 }
 
 function raftCmakeCommand() {
-    time cmake ../../raft/cpp
+    time cmake $*
 }
 
 function raftCppBuild() {
@@ -51,29 +52,44 @@ function raftCppTest() {
         echo "Error! Not inside raft cmake build folder!!" 1>&2
         return 1
     fi
-    ./test_raft
+    time ./test_raft
 }
 
 function raftPyBuild() {
-    local cwd=$(basename $(pwd))
-    local dir=`raftSrcDir`
-    if [ "$?" != "0" ]; then
-        return 1
-    fi
-    pushd $dir/python
-    env RAFT_BUILD_PATH=$cwd python setup.py build_ext --inplace
-    popd
-}
-
-function raftPyTest() {
+    local opts=$*
     local cwd=`pwd`
     local dir=`raftSrcDir`
     if [ "$?" != "0" ]; then
         return 1
     fi
     pushd $dir/python
-    env LD_LIBRARY_PATH=$cwd:$LD_LIBRARY_PATH py.test -v $*
+    time python setup.py build_ext --inplace $opts
+    popd
+}
+
+function raftPyTest() {
+    local tests=${1:-raft/test}
+    local dir=`raftSrcDir`
+    if [ "$?" != "0" ]; then
+        return 1
+    fi
+    pushd $dir/python
+    time py.test -v $tests
+    popd
+}
+
+function raftFlake8() {
+    local dir=`raftSrcDir`
+    if [ "$?" != "0" ]; then
+        return 1
+    fi
+    pushd $dir
+    flake8 --exclude=cpp,thirdparty,__init__.py,versioneer.py && \
+        flake8 --config=python/.flake8.cython
     popd
 }
 
 source activate cuml_dev
+export RAFT_BUILD_PATH=`pwd`   # current dir is assumed to be the cmake build path!!
+export LD_LIBRARY_PATH=$RAFT_BUILD_PATH:$LD_LIBRARY_PATH
+export PYTHONPATH=`raftSrcDir`/python

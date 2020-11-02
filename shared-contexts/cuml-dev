@@ -58,7 +58,6 @@ function cumlCppTest() {
 
 function cumlPyBuild() {
     local opts=$*
-    local cwd=`pwd`
     local dir=`cumlSrcDir`
     if [ "$?" != "0" ]; then
         return 1
@@ -70,7 +69,6 @@ function cumlPyBuild() {
 
 function cumlPyTest() {
     local tests=${1:-cuml/test}
-    local cwd=`pwd`
     local dir=`cumlSrcDir`
     if [ "$?" != "0" ]; then
         return 1
