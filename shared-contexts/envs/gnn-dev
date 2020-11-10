@@ -1,0 +1,78 @@
+
+function cugnnSrcDir() {
+    local file="CMakeCache.txt"
+    if [ ! -e "$file" ]; then
+        echo "Error! Not inside cugnn cmake build folder!!" 1>&2
+        return 1
+    fi
+    local cppDir=`grep CUGNN_SOURCE_DIR "$file" | sed -e 's/.*=//'`
+    dirname $cppDir
+}
+
+function cugnnFixClangFormat() {
+    time make fix-clang-format
+}
+
+function cugnnClangTidy() {
+    time make clang-tidy
+}
+
+function cugnnCmakeCommand() {
+    time cmake $*
+}
+
+function cugnnCppBuild() {
+    local file="CMakeCache.txt"
+    if [ ! -e "$file" ]; then
+        echo "Error! Not inside cugnn cmake build folder!!" 1>&2
+        return 1
+    fi
+    time make -j $*
+}
+
+function cugnnCppTest() {
+    local file="CMakeCache.txt"
+    if [ ! -e "$file" ]; then
+        echo "Error! Not inside cugnn cmake build folder!!" 1>&2
+        return 1
+    fi
+    time ./cpp/test/cugnn_sg_tests
+}
+
+# function cugnnPyBuild() {
+#     local opts=$*
+#     local dir=`cugnnSrcDir`
+#     if [ "$?" != "0" ]; then
+#         return 1
+#     fi
+#     pushd $dir/python
+#     time python setup.py build_ext --inplace $opts
+#     popd
+# }
+
+# function cugnnPyTest() {
+#     local tests=${1:-cugnn/test}
+#     local dir=`cugnnSrcDir`
+#     if [ "$?" != "0" ]; then
+#         return 1
+#     fi
+#     pushd $dir/python
+#     time py.test -v $tests
+#     popd
+# }
+
+# function cugnnFlake8() {
+#     local dir=`cugnnSrcDir`
+#     if [ "$?" != "0" ]; then
+#         return 1
+#     fi
+#     pushd $dir
+#     flake8 --exclude=cpp,thirdparty,__init__.py,versioneer.py,python/_external_repositories && \
+#         flake8 --config=python/.flake8.cython
+#     popd
+# }
+
+source activate gnn_dev
+export CUGNN_BUILD_PATH=`pwd`   # current dir is assumed to be the cmake build path!!
+export LD_LIBRARY_PATH=$CUGNN_BUILD_PATH:$LD_LIBRARY_PATH
+export PYTHONPATH=`cugnnSrcDir`/python
