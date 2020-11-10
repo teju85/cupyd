@@ -5,12 +5,24 @@ function cugnnSrcDir() {
         echo "Error! Not inside cugnn cmake build folder!!" 1>&2
         return 1
     fi
-    local cppDir=`grep CUGNN_SOURCE_DIR "$file" | sed -e 's/.*=//'`
-    dirname $cppDir
+    grep CUGNN_SOURCE_DIR "$file" | sed -e 's/.*=//'
 }
 
 function cugnnFixClangFormat() {
+    local dir=`cugnnSrcDir`
+    if [ "$?" != "0" ]; then
+        return 1
+    fi
     time make fix-clang-format
+    pushd $dir
+    local changes=`git status -s`
+    if [ "$changes" != "" ]; then
+        echo "There seem to be clang-format fixes present. Committing them..."
+        git add cpp/ && git commit -m 'FIX clang-format fixes'
+    else
+        echo "No clang-format fixes."
+    fi
+    popd
 }
 
 function cugnnClangTidy() {
