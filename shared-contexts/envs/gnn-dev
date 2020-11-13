@@ -48,7 +48,7 @@ function cugnnCppTest() {
         echo "Error! Not inside cugnn cmake build folder!!" 1>&2
         return 1
     fi
-    time ./cpp/test/cugnn_sg_tests
+    time ./cpp/tests/cugnn_sg_tests
 }
 
 # function cugnnPyBuild() {

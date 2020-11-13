@@ -4,12 +4,16 @@ channels:
   - nvidia
   - conda-forge
 dependencies:
-  - clang=11.0.0
-  - clang-tools=11.0.0
   - cmake=3.17
+  - compilers
+  - conda-forge::clang=11.0.0
+  - conda-forge::clang-tools=11.0.0
   - cython>=0.29,<0.30
   - doxygen=1.8.20
   - flake8
   - jupyter
+  - matplotlib
+  - numpy
+  - pandas
   - pytest>=4.6
   - scikit-learn>=0.21
