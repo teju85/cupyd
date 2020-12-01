@@ -28,7 +28,7 @@ def emit(writer, cudaVersion, baseImage="ubuntu:18.04", rcUrl=None):
     # devtools
     if short <= 9.0:
         pkgs.append("cuda-nsight-$pkgVersion")
-    if short >= 10.0:
+    if short >= 10.1:
         pkgs += [
             "cuda-nsight-compute-$pkgVersion",
             "cuda-nsight-systems-$pkgVersion",
