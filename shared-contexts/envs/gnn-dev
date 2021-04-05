@@ -8,6 +8,10 @@ function cugnnSrcDir() {
     grep CUGNN_SOURCE_DIR "$file" | sed -e 's/.*=//'
 }
 
+function cugnnClangFormat() {
+    time make clang-format
+}
+
 function cugnnFixClangFormat() {
     local dir=`cugnnSrcDir`
     if [ "$?" != "0" ]; then
@@ -18,7 +22,7 @@ function cugnnFixClangFormat() {
     local changes=`git status -s`
     if [ "$changes" != "" ]; then
         echo "There seem to be clang-format fixes present. Committing them..."
-        git add cpp/ && git commit -m 'FIX clang-format fixes'
+        git add cpp/ python/ && git commit -m 'clang-format fixes'
     else
         echo "No clang-format fixes."
     fi
@@ -33,7 +37,7 @@ function cugnnCmakeCommand() {
     time cmake $*
 }
 
-function cugnnCppBuild() {
+function cugnnBuild() {
     local file="CMakeCache.txt"
     if [ ! -e "$file" ]; then
         echo "Error! Not inside cugnn cmake build folder!!" 1>&2
@@ -51,17 +55,6 @@ function cugnnCppTest() {
     time ./cpp/tests/cugnn_sg_tests
 }
 
-# function cugnnPyBuild() {
-#     local opts=$*
-#     local dir=`cugnnSrcDir`
-#     if [ "$?" != "0" ]; then
-#         return 1
-#     fi
-#     pushd $dir/python
-#     time python setup.py build_ext --inplace $opts
-#     popd
-# }
-
 # function cugnnPyTest() {
 #     local tests=${1:-cugnn/test}
 #     local dir=`cugnnSrcDir`
@@ -73,16 +66,9 @@ function cugnnCppTest() {
 #     popd
 # }
 
-# function cugnnFlake8() {
-#     local dir=`cugnnSrcDir`
-#     if [ "$?" != "0" ]; then
-#         return 1
-#     fi
-#     pushd $dir
-#     flake8 --exclude=cpp,thirdparty,__init__.py,versioneer.py,python/_external_repositories && \
-#         flake8 --config=python/.flake8.cython
-#     popd
-# }
+function cugnnFlake8() {
+    time make flake8
+}
 
 source activate gnn_dev
 export CUGNN_BUILD_PATH=`pwd`   # current dir is assumed to be the cmake build path!!
