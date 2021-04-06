@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 import modules.dev_env
-import modules.cuml_dev
+import modules.gnn_dev
 import modules.cuda
 import modules.cudnn_dev
 import modules.internal
@@ -18,11 +18,10 @@ def emit(writer, **kwargs):
     modules.cudnn_dev.emit(writer, kwargs["cudnnVersion"],
                            kwargs["cudaVersion"], kwargs["base"],
                            kwargs["rcUrl"])
-    modules.cuml_dev.emit(writer, **kwargs)
+    modules.gnn_dev.emit(writer, **kwargs)
     modules.dev_env.emit(writer, **kwargs)
 
 
-rapidsVersion = "0.19"
 def images():
     imgs = {}
     for osVer in ["18.04"]:
@@ -33,13 +32,12 @@ def images():
                 cu_short = cu_short.replace(".", "")
                 _, _, short = modules.cudnn_dev.shortVersion(cudnnVer)
                 short = short.replace(".", "")
-                imgName = "ml-dev:%s-%s-%s" % (verStr, cu_short, short)
+                imgName = "gnn-dev:%s-%s-%s" % (verStr, cu_short, short)
                 imgs[imgName] = {
                     "cudaVersion": cudaVer,
                     "cudnnVersion": cudnnVer,
                     "base": "ubuntu:%s" % osVer,
                     "needsContext": True,
-                    "rapidsVersion": rapidsVersion,
                 }
     imgs.update(modules.internal.read_rc())
     return imgs
