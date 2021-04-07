@@ -6,7 +6,6 @@ GPGKEY_FPR="ae09fe4bbd223a84b2ccfce3f60f4b3d7fa2af80"
 
 
 def _emitHeader1804(writer, osVer):
-    writer.packages(["ca-certificates", "curl", "gnupg2"])
     writer.emit("""
 RUN curl -fsSL https://developer.download.nvidia.com/compute/cuda/repos/$osVer/x86_64/7fa2af80.pub | apt-key add - && \\
     echo "deb https://developer.download.nvidia.com/compute/cuda/repos/$osVer/x86_64 /" > /etc/apt/sources.list.d/cuda.list && \\
@@ -14,7 +13,7 @@ RUN curl -fsSL https://developer.download.nvidia.com/compute/cuda/repos/$osVer/x
                 osVer=osVer)
 
 
-def _emitHeaderOthers(writer, osVer):
+def _emitHeaderOld(writer, osVer):
     writer.emit("""
 RUN apt-key adv --fetch-keys "http://developer.download.nvidia.com/compute/cuda/repos/$osVer/x86_64/7fa2af80.pub" && \\
     apt-key adv --export --no-emit-version -a $GPGKEY_FPR | tail -n +5 > cudasign.pub && \\
@@ -27,7 +26,6 @@ RUN apt-key adv --fetch-keys "http://developer.download.nvidia.com/compute/cuda/
 
 
 def _emitHeaderRC(writer, osVer, rcUrl):
-    writer.packages(["ca-certificates", "curl", "gnupg2"])
     writer.emit("""
 RUN curl -fsSL $rcUrl/$osVer/x86_64/7fa2af80.pub | apt-key add - && \\
     echo "deb $rcUrl/$osVer/x86_64 /" > /etc/apt/sources.list.d/cuda.list""",
@@ -38,13 +36,14 @@ def emitHeader(writer, baseImage, rcUrl=None):
     writer.emit("LABEL maintainer=\"NVIDIA CORPORATION <cudatools@nvidia.com>\"")
     osVer = re.sub(":", "", baseImage)
     osVer = re.sub("[.]", "", osVer)
+    writer.packages(["ca-certificates", "curl", "gnupg2"])
     if rcUrl is not None:
         _emitHeaderRC(writer, osVer, rcUrl)
         return
-    if osVer == "ubuntu1804":
+    if osVer == "ubuntu1804" or osVer == "ubuntu2004":
         _emitHeader1804(writer, osVer)
     else:
-        _emitHeaderOthers(writer, osVer)
+        _emitHeaderOld(writer, osVer)
 
 
 def shortVersion(cudaVersion):

@@ -5,7 +5,7 @@ function cumlSrcDir() {
         echo "Error! Not inside cuml cmake build folder!!" 1>&2
         return 1
     fi
-    local cppDir=`grep CUML_SOURCE_DIR "$file" | sed -e 's/.*=//'`
+    local cppDir=`grep cuML_SOURCE_DIR "$file" | sed -e 's/.*=//'`
     dirname $cppDir
 }
 
