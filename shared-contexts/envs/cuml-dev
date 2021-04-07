@@ -89,7 +89,31 @@ function cumlFlake8() {
     popd
 }
 
+function find_first() {
+    local file=$1
+    local dir=$2
+    if [ "$file" = "" ]; then
+        echo "USAGE: find_first <file>"
+        return 1
+    fi
+    if [ "$dir" = "" ]; then
+        dir=`pwd`
+    fi
+    "cd" $dir
+    while [ true ]; do
+        if [ -e "$file" ]; then
+            readlink -f $file
+            return 0
+        fi
+        "cd" ..
+        if [ "`pwd`" = "/" ]; then
+            return 1
+        fi
+    done
+}
+
 source activate cuml_dev
 export CUML_BUILD_PATH=`pwd`   # current dir is assumed to be the cmake build path!!
 export LD_LIBRARY_PATH=$CUML_BUILD_PATH:$LD_LIBRARY_PATH
 export PYTHONPATH=`cumlSrcDir`/python
+export CCACHE_CONFIGPATH=`find_first ccache.conf "$CUML_BUILD_PATH"`
