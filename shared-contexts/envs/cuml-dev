@@ -40,6 +40,7 @@ function cumlClangTidy() {
 function cumlCmakeCommand() {
     time cmake \
             -DBLAS_LIBRARIES=$CONDA_PREFIX/lib/libopenblas.so.0 \
+            -DUSE_CCACHE=ON \
             $*
 }
 
