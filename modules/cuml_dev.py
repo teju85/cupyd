@@ -10,11 +10,12 @@ def ml_env(writer, cudaVersionShort, rapidsVersion):
         -O cuml_dev.yml && \\
     mamba env create -n cuml_dev -f cuml_dev.yml && \\
     rm -f cuml_dev.yml && \\
-    mamba clean --yes --all""",
+    mamba clean -ya""",
                 repo=repo,
                 branch=branch,
                 cudaVersionShort=cudaVersionShort)
-    writer.emit("""RUN mamba install -c conda-forge clang=11.0.0 clang-tools=11.0.0""")
+    writer.condaPackages(["ccache", "clang=11.0.0", "clang-tools=11.0.0"],
+                         channels=["conda-forge"], cmd="mamba")
 
 
 def emit(writer, **kwargs):
