@@ -9,4 +9,4 @@ def emit(writer):
     rm /opt/miniconda.sh
 
 ENV PATH /opt/conda/bin:$${PATH}""")
-    writer.condaPackages(["mamba"], channels=["base", "conda-forge"])
+    writer.condaPackages(["libarchive", "mamba", "python=3.8"], channels=["base", "conda-forge"])
