@@ -18,12 +18,12 @@ def emit(writer, **kwargs):
     modules.dev_env.emit(writer, **kwargs)
 
 
-rapidsVersion = "21.06"
+rapidsVersion = "21.10"
 def images():
     imgs = {}
-    for osVer in ["18.04", "20.04"]:
+    for osVer in ["20.04"]:
         verStr = osVer.replace(".", "")
-        for cudaVer in ["11.0", "11.2"]:
+        for cudaVer in ["11.2", "11.4"]:
             _, _, cu_short, _ = modules.cuda.shortVersion(cudaVer)
             cu_short = cu_short.replace(".", "")
             imgName = "ml-dev:%s-%s" % (verStr, cu_short)
