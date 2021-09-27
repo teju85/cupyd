@@ -2,7 +2,6 @@ from __future__ import absolute_import
 import modules.build_essential
 import modules.cuda_dev
 import modules.conda
-import modules.conda_ml_env
 import modules.dev_env
 import modules.internal
 
@@ -18,7 +17,7 @@ def emit(writer, **kwargs):
     modules.cuda_dev.emit(writer, kwargs["cudaVersion"], kwargs["base"],
                           kwargs["rcUrl"])
     modules.conda.emit(writer)
-    modules.conda_ml_env.emit(writer)
+    writer.condaPackages(["matplotlib", "numpy", "pandas"], cmd="mamba")
     modules.dev_env.emit(writer, **kwargs)
 
 
