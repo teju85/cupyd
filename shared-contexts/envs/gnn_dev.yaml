@@ -8,12 +8,15 @@ dependencies:
   - compilers
   - conda-forge::clang=11.0.0
   - conda-forge::clang-tools=11.0.0
-  - cython>=0.29,<0.30
+  - conda-forge::unzip
+  - conda-forge::wget
   - doxygen=1.8.20
   - flake8
   - jupyter
   - matplotlib
   - numpy
+  - nvidia::cuda-toolkit=11.2.*
+  - conda-forge::cudnn=8.2.*
   - pandas
   - pytest>=4.6
   - scikit-learn>=0.21
