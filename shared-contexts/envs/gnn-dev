@@ -8,10 +8,6 @@ function cugnnSrcDir() {
     grep CUGNN_SOURCE_DIR "$file" | sed -e 's/.*=//'
 }
 
-function cugnnClangFormat() {
-    time make clang-format
-}
-
 function cugnnFixClangFormat() {
     local dir=`cugnnSrcDir`
     if [ "$?" != "0" ]; then
@@ -29,48 +25,7 @@ function cugnnFixClangFormat() {
     popd
 }
 
-function cugnnClangTidy() {
-    time make clang-tidy
-}
-
-function cugnnCmakeCommand() {
-    time cmake $*
-}
-
-function cugnnBuild() {
-    local file="CMakeCache.txt"
-    if [ ! -e "$file" ]; then
-        echo "Error! Not inside cugnn cmake build folder!!" 1>&2
-        return 1
-    fi
-    time make -j $*
-}
-
-function cugnnCppTest() {
-    local file="CMakeCache.txt"
-    if [ ! -e "$file" ]; then
-        echo "Error! Not inside cugnn cmake build folder!!" 1>&2
-        return 1
-    fi
-    time ./cpp/tests/cugnn_sg_tests
-}
-
-# function cugnnPyTest() {
-#     local tests=${1:-cugnn/test}
-#     local dir=`cugnnSrcDir`
-#     if [ "$?" != "0" ]; then
-#         return 1
-#     fi
-#     pushd $dir/python
-#     time py.test -v $tests
-#     popd
-# }
-
-function cugnnFlake8() {
-    time make flake8
-}
-
 source activate gnn_dev
 export CUGNN_BUILD_PATH=`pwd`   # current dir is assumed to be the cmake build path!!
-export LD_LIBRARY_PATH=$CUGNN_BUILD_PATH:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=$CUGNN_BUILD_PATH/cpp/src:$LD_LIBRARY_PATH
 export PYTHONPATH=`cugnnSrcDir`/python
