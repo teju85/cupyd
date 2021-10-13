@@ -13,8 +13,6 @@ def gnn_env(writer):
 
 def emit(writer, **kwargs):
     modules.conda.emit(writer)
-    if "rapidsVersion" not in kwargs:
-        raise Exception("'rapidsVersion' is mandatory!")
     if "cudaVersion" not in kwargs:
         raise Exception("'cudaVersion' is mandatory!")
     _, _, cudaVersionShort, _ = cuda.shortVersion(kwargs["cudaVersion"])
