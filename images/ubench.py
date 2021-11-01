@@ -23,9 +23,9 @@ def emit(writer, **kwargs):
 
 def images():
     imgs = {}
-    for osVer in ["18.04"]:
+    for osVer in ["20.04"]:
         verStr = osVer.replace(".", "")
-        for cudaVer in ["10.0", "10.1", "10.2", "11.0", "11.1", "11.2"]:
+        for cudaVer in ["10.0", "10.1", "10.2", "11.0", "11.1", "11.2", "11.4"]:
             _, _, short, _ = modules.cuda.shortVersion(cudaVer)
             short = short.replace(".", "")
             imgName = "ubench:%s-%s" % (verStr, short)
