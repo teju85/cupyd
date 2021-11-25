@@ -33,12 +33,11 @@ def copydir(src, dst):
     shutil.copytree(src, dst)
 
 
-def findimage(args, dir="images"):
+def findimage(args):
     image = args.img
+    dir = args.path
     for file in glob.glob("%s/*.py" % dir):
-        if "__init__" in file:
-            continue
-        fullName = file.replace("/", ".").replace(".py", "")
+        fullName = file.replace(dir + "/", "").replace(".py", "")
         module = importlib.import_module(fullName)
         imgs = module.images()
         for img in imgs.keys():
@@ -53,9 +52,7 @@ def findimage(args, dir="images"):
 def listimages(dir="images"):
     imgs = []
     for file in glob.glob("%s/*.py" % dir):
-        if "__init__" in file:
-            continue
-        fullName = file.replace("/", ".").replace(".py", "")
+        fullName = file.replace(dir + "/", "").replace(".py", "")
         module = importlib.import_module(fullName)
         imgs += module.images().keys()
     print("List of images supported:")
@@ -103,6 +100,8 @@ def parseargs():
         help="Do not expose ports to the host machine")
     parser.add_argument("-onlycopy", action="store_true", default=False,
         help="Only copy the Dockerfile folder")
+    parser.add_argument("-path", default="images", type=str,
+        help="Path where to find the images")
     parser.add_argument("-printComments", action="store_true", default=False,
         help="Print the origin of docker commands in the generated Dockerfile")
     parser.add_argument("-privileged", action="store_true", default=False,
@@ -130,6 +129,8 @@ def parseargs():
     parser.add_argument("cmd", nargs=argparse.REMAINDER,
         help="Command to run inside the container")
     args = parser.parse_args()
+    args.path = args.path.rstrip("/")
+    sys.path.append(args.path)
     validateargs(args)
     return args
 
@@ -408,7 +409,7 @@ class Builder:
 if __name__ == "__main__":
     args = parseargs()
     if args.list:
-        listimages()
+        listimages(args.path)
         sys.exit(0)
     if args.build:
         with Builder(args) as b:
