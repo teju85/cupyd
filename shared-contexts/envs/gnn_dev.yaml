@@ -5,10 +5,10 @@ channels:
   - conda-forge
 dependencies:
   - cmake>=3.20
-  - clang=11.0.0
-  - clang-tools=11.0.0
+  - clang=11.1.0
+  - clang-tools=11.1.0
   - compilers
-  - cudatoolkit=11.2
+  - cudatoolkit=11.5
   - cudnn=8.2
   - doxygen=1.8.20
   - flake8
