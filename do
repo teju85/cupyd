@@ -102,6 +102,9 @@ def parseargs():
         help="Only copy the Dockerfile folder")
     parser.add_argument("-path", default="images", type=str,
         help="Path where to find the images")
+    parser.add_argument("-precmd", default=None, type=str,
+        help="Run this command just *before* launching the container. This is "
+        " valid only when the '-run' option is passed.")
     parser.add_argument("-printComments", action="store_true", default=False,
         help="Print the origin of docker commands in the generated Dockerfile")
     parser.add_argument("-privileged", action="store_true", default=False,
@@ -186,6 +189,9 @@ class Runner:
                          "seccomp=unconfined"]
         finalcmd.append(args.img)
         finalcmd += self.__getCmd(args)
+        if args.precmd:
+            print("Running pre-cmd before starting the container...")
+            runcmd(args.precmd)
         dockercmd("run", *finalcmd)
 
     def __get(self, image, *args):
