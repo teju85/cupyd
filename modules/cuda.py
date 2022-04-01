@@ -8,8 +8,7 @@ GPGKEY_FPR="ae09fe4bbd223a84b2ccfce3f60f4b3d7fa2af80"
 def _emitHeader1804(writer, osVer):
     writer.emit("""
 RUN curl -fsSL https://developer.download.nvidia.com/compute/cuda/repos/$osVer/x86_64/7fa2af80.pub | apt-key add - && \\
-    echo "deb https://developer.download.nvidia.com/compute/cuda/repos/$osVer/x86_64 /" > /etc/apt/sources.list.d/cuda.list && \\
-    echo "deb https://developer.download.nvidia.com/compute/machine-learning/repos/$osVer/x86_64 /" > /etc/apt/sources.list.d/nvidia-ml.list""",
+    echo "deb https://developer.download.nvidia.com/compute/cuda/repos/$osVer/x86_64 /" > /etc/apt/sources.list.d/cuda.list""",
                 osVer=osVer)
 
 
@@ -18,8 +17,7 @@ def _emitHeaderOld(writer, osVer):
 RUN apt-key adv --fetch-keys "http://developer.download.nvidia.com/compute/cuda/repos/$osVer/x86_64/7fa2af80.pub" && \\
     apt-key adv --export --no-emit-version -a $GPGKEY_FPR | tail -n +5 > cudasign.pub && \\
     echo "$GPGKEY_SUM  cudasign.pub" | sha256sum -c --strict - && rm cudasign.pub && \\
-    echo "deb http://developer.download.nvidia.com/compute/cuda/repos/$osVer/x86_64 /" > /etc/apt/sources.list.d/cuda.list && \\
-    echo "deb http://developer.download.nvidia.com/compute/machine-learning/repos/$osVer/x86_64 /" > /etc/apt/sources.list.d/nvidia-ml.list""",
+    echo "deb http://developer.download.nvidia.com/compute/cuda/repos/$osVer/x86_64 /" > /etc/apt/sources.list.d/cuda.list""",
                 GPGKEY_SUM=GPGKEY_SUM,
                 GPGKEY_FPR=GPGKEY_FPR,
                 osVer=osVer)
