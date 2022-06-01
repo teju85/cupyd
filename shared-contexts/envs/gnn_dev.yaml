@@ -2,14 +2,16 @@ name: gnn_dev
 channels:
   - rapidsai
   - nvidia
+  - rapidsai-nightly
   - conda-forge
 dependencies:
-  - cmake>=3.20,<3.21
+  - cmake>=3.20,!=3.23.0
   - clang=11.1.0
   - clang-tools=11.1.0
   - compilers
   - cudatoolkit=11.5
   - cudnn=8.2
+  - cython>=0.29,<0.30
   - doxygen=1.8.20
   - flake8
   - jupyter

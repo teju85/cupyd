@@ -375,6 +375,17 @@ class Writer:
     %s clean -ya""" % cmd
         self.emit(str, caller=caller, **kwargs)
 
+    def condaEnv(self, yamlFile, envName, cmd="conda", deleteYaml=False, caller=2):
+        if deleteYaml:
+            self.emit("""RUN \\
+    $cmd env create -n $envName -f $yamlFile && \\
+    rm -f $yamlFile && \\
+    $cmd clean --yes --all""", caller=caller, envName=envName, yamlFile=yamlFile)
+        else:
+            self.emit("""RUN \\
+    $cmd env create -n $envName -f $yamlFile && \\
+    $cmd clean --yes --all""", caller=caller, envName=envName, yamlFile=yamlFile)
+
 
 class Builder:
     def __init__(self, args):

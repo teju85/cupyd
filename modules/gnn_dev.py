@@ -5,10 +5,7 @@ import modules.jupyter
 
 def gnn_env(writer):
     writer.emit("COPY contexts/envs/gnn_dev.yaml /tmp/gnn_dev.yaml")
-    writer.emit("""RUN \\
-    mamba env create -n gnn_dev -f /tmp/gnn_dev.yaml && \\
-    rm -f /tmp/gnn_dev.yaml && \\
-    mamba clean --yes --all""")
+    writer.condaEnv("/tmp/gnn_dev.yaml", "gnn_dev", deleteYaml=True)
 
 
 def emit(writer, **kwargs):
