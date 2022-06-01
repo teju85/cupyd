@@ -1,47 +1,24 @@
 import re
 
-# shamelessly copied and modified from nvidia's dockerfiles on gitlab!
-GPGKEY_SUM="d1be581509378368edeec8c1eb2958702feedf3bc3d17011adbf24efacce4ab5"
-GPGKEY_FPR="ae09fe4bbd223a84b2ccfce3f60f4b3d7fa2af80"
 
-
-def _emitHeader1804(writer, osVer):
-    writer.emit("""
-RUN curl -fsSL https://developer.download.nvidia.com/compute/cuda/repos/$osVer/x86_64/7fa2af80.pub | apt-key add - && \\
-    echo "deb https://developer.download.nvidia.com/compute/cuda/repos/$osVer/x86_64 /" > /etc/apt/sources.list.d/cuda.list""",
-                osVer=osVer)
-
-
-def _emitHeaderOld(writer, osVer):
-    writer.emit("""
-RUN apt-key adv --fetch-keys "http://developer.download.nvidia.com/compute/cuda/repos/$osVer/x86_64/7fa2af80.pub" && \\
-    apt-key adv --export --no-emit-version -a $GPGKEY_FPR | tail -n +5 > cudasign.pub && \\
-    echo "$GPGKEY_SUM  cudasign.pub" | sha256sum -c --strict - && rm cudasign.pub && \\
-    echo "deb http://developer.download.nvidia.com/compute/cuda/repos/$osVer/x86_64 /" > /etc/apt/sources.list.d/cuda.list""",
-                GPGKEY_SUM=GPGKEY_SUM,
-                GPGKEY_FPR=GPGKEY_FPR,
-                osVer=osVer)
+# https://forums.developer.nvidia.com/t/notice-cuda-linux-repository-key-rotation/
+KEYRING_VERSION = "1.0-1"
 
 
 def _emitHeaderRC(writer, osVer, rcUrl):
     writer.emit("""
-RUN curl -fsSL $rcUrl/$osVer/x86_64/7fa2af80.pub | apt-key add - && \\
-    echo "deb $rcUrl/$osVer/x86_64 /" > /etc/apt/sources.list.d/cuda.list""",
-                osVer=osVer, rcUrl=rcUrl)
+RUN curl --output cuda-keyring.deb $rcUrl/$osVer/x86_64/cuda-keyring_${KEYRING_VERSION}_all.deb && \\
+    dpkg -i cuda-keyring.deb && \\
+    rm -f cuda-keyring.deb""",
+                osVer=osVer, rcUrl=rcUrl, KEYRING_VERSION=KEYRING_VERSION)
 
 
-def emitHeader(writer, baseImage, rcUrl=None):
+def emitHeader(writer, baseImage, rcUrl):
     writer.emit("LABEL maintainer=\"NVIDIA CORPORATION <cudatools@nvidia.com>\"")
     osVer = re.sub(":", "", baseImage)
     osVer = re.sub("[.]", "", osVer)
     writer.packages(["ca-certificates", "curl", "gnupg2"])
-    if rcUrl is not None:
-        _emitHeaderRC(writer, osVer, rcUrl)
-        return
-    if osVer == "ubuntu1804" or osVer == "ubuntu2004":
-        _emitHeader1804(writer, osVer)
-    else:
-        _emitHeaderOld(writer, osVer)
+    _emitHeaderRC(writer, osVer, rcUrl)
 
 
 def shortVersion(cudaVersion):
@@ -81,6 +58,8 @@ ENV NVIDIA_REQUIRE_CUDA "cuda>=$versionShort"
 
 
 def emit(writer, cudaVersion, baseImage, rcUrl=None):
+    if rcUrl is None:
+        rcUrl = "https://developer.download.nvidia.com/compute/cuda/repos"
     major, minor, versionShort, pkgVersion = shortVersion(cudaVersion)
     emitHeader(writer, baseImage, rcUrl)
     writer.emit("ENV CUDA_VERSION $cudaVersion", cudaVersion=cudaVersion)

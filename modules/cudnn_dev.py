@@ -3,10 +3,11 @@ import modules.cuda_dev
 import modules.cuda
 
 
-def _emitHeader(writer, osVer):
+def _emitHeader(writer, osVer,
+                rcUrl="http://developer.download.nvidia.com/compute/machine-learning/repos"):
     writer.emit("""
-RUN echo "deb http://developer.download.nvidia.com/compute/machine-learning/repos/$osVer/x86_64 /" > /etc/apt/sources.list.d/nvidia-ml.list""",
-                osVer=osVer)
+RUN echo "deb $rcUrl/$osVer/x86_64 /" > /etc/apt/sources.list.d/nvidia-ml.list""",
+                rcUrl=rcUrl, osVer=osVer)
 
 
 def shortVersion(cudnnVersion):
