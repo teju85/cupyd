@@ -380,11 +380,11 @@ class Writer:
             self.emit("""RUN \\
     $cmd env create -n $envName -f $yamlFile && \\
     rm -f $yamlFile && \\
-    $cmd clean --yes --all""", caller=caller, envName=envName, yamlFile=yamlFile)
+    $cmd clean --yes --all""", cmd=cmd, caller=caller, envName=envName, yamlFile=yamlFile)
         else:
             self.emit("""RUN \\
     $cmd env create -n $envName -f $yamlFile && \\
-    $cmd clean --yes --all""", caller=caller, envName=envName, yamlFile=yamlFile)
+    $cmd clean --yes --all""", cmd=cmd, caller=caller, envName=envName, yamlFile=yamlFile)
 
 
 class Builder:
