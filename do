@@ -29,6 +29,10 @@ def dockercmdout(*args):
     return subprocess.check_output(cmd, shell=True)
 
 
+def enrootcmd(datapath, *args):
+    cmd = "ENROOT_DATA_PATH=" + datapath + " enroot " + " ".join(args)
+    runcmd(cmd)
+
 def copydir(src, dst):
     shutil.copytree(src, dst)
 
@@ -71,6 +75,8 @@ def validateargs(args):
         raise Exception("'-image' is needed with '-build'!")
     if args.copy and not args.build:
         raise Exception("'-copy' is meaningful only with '-build'!")
+    if args.create and not args.enrootdir:
+        raise Exception("'-enrootdir' is mandatory with '-create'!")
     if not args.list:
         args.module, args.imgArgs = findimage(args)
 
@@ -86,6 +92,8 @@ def parseargs():
         help="Copy the temporary build dir into this dir")
     parser.add_argument("-dns", default=[], action="append", type=str,
         help="Pass DNS servers to be used inside container")
+    parser.add_argument("-enrootdir", default=None, type=str,
+        help="Enroot data path variable")
     parser.add_argument("-env", default=[], action="append", type=str,
         help="Pass environmental variables to be used inside container")
     parser.add_argument("-gdb", default=False, action="store_true",
@@ -115,8 +123,12 @@ def parseargs():
         help="Push the local image to a remote registry.")
     parser.add_argument("-repo", default="nvcr.io/nvidian/dt-compute/teju85-",
         type=str, help="Remote registry prefix to pull/push this image from/to")
+    parser.add_argument("-create", default=False, action="store_true",
+        help="Create enroot image from the docker image. If this option is passed"
+        " then '-enrootdir' is mandatory")
     parser.add_argument("-run", default=False, action="store_true",
-        help="Run the image to launch a container")
+        help="Run the image to launch a container. If '-enrootdir' is passed"
+        " then 'enroot start' will be used instead.")
     parser.add_argument("-runas", choices=["user", "root", "uid"],
         default="user", type=str,
         help="Run as specified. Default is root. Options: "
@@ -134,6 +146,7 @@ def parseargs():
     args = parser.parse_args()
     args.path = args.path.rstrip("/")
     sys.path.append(args.path)
+    args.enroot_img = args.img.replace(":", "+")
     validateargs(args)
     return args
 
@@ -162,7 +175,32 @@ class Pusher:
         dockercmd("rmi", there)
 
 
-class Runner:
+class Creator:
+    def __init__(self, args):
+        self.args = args
+
+    def __enter__(self):
+        self.squash = self.args.enroot_img + ".sqsh"
+        if os.path.exists(self.squash):
+            os.unlink(self.squash)
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        if os.path.exists(self.squash):
+            os.unlink(self.squash)
+
+    def run(self):
+        enrootcmd(self.args.enrootdir, "import", "--output", self.squash,
+                  "dockerd://" + self.args.img)
+        path = os.path.join(self.args.enrootdir, self.args.enroot_img)
+        if os.path.exists(path):
+            enrootcmd(self.args.enrootdir, "remove", "--force",
+                      self.args.enroot_img)
+        enrootcmd(self.args.enrootdir, "create", "--name", self.args.enroot_img,
+                  self.squash)
+
+
+class DockerRunner:
     def __init__(self, args):
         self.args = args
 
@@ -315,6 +353,42 @@ class Runner:
         return out
 
 
+class EnrootRunner:
+    def __init__(self, args):
+        self.args = args
+
+    def run(self):
+        cmd = ["start"]
+        cmd += self.__getVols()
+        cmd += self.__getEnvVars()
+        cmd.append(self.args.enroot_img)
+        cmd += self.__getCmd()
+        if self.args.precmd:
+            print("Running pre-cmd before starting the enroot container...")
+            runcmd(self.args.precmd)
+        enrootcmd(self.args.enrootdir, *cmd)
+
+    def __getVols(self):
+        vols = []
+        for vol in self.args.v:
+            vols.append("-m %s" % vol)
+        return vols
+
+    def __getEnvVars(self):
+        out = []
+        for e in self.args.env:
+            out.append("-e %s" % e)
+        return out
+
+    def __getCmd(self):
+        if len(self.args.cmd) > 0:
+            cmd = " ".join(self.args.cmd)
+        else:
+            cmd = "/bin/bash"
+        # single quotes around to directly pass this command to container!
+        return ["'%s'" % cmd]
+
+
 class Writer:
     def __init__(self, verbose=False, file="Dockerfile"):
         self.verbose = verbose
@@ -436,5 +510,13 @@ if __name__ == "__main__":
     # push should only be done after a build!
     if args.push:
         Pusher(args).run()
+    # enroot image creator should only be called after build/pull
+    if args.create:
+        with Creator(args) as c:
+            c.run()
+    # run happens only at the last!
     if args.run:
-        Runner(args).run()
+        if args.enrootdir:
+            EnrootRunner(args).run()
+        else:
+            DockerRunner(args).run()
