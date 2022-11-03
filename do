@@ -114,12 +114,6 @@ def parseargs():
         help="Pass a '--privileged' option to docker run command.")
     docker.add_argument("-repo", default="nvcr.io/nvidian/dt-compute/teju85-",
         type=str, help="Remote registry prefix to pull/push this image from/to")
-    docker.add_argument("-runas", choices=["user", "root", "uid"],
-        default="user", type=str,
-        help="Run as specified. Default is root. Options: "
-        " user [run as current user by switching user inside the container]"
-        " root [run as root, without any of these switching abilities]"
-        " uid  ['-u' option to docker. To run on non-privileged containers]")
     docker.add_argument("-security", type=str, default=None,
         help="Same as --security-opt option of docker")
     # options that work with both docker/enroot
@@ -132,6 +126,12 @@ def parseargs():
     both.add_argument("-precmd", default=None, type=str,
         help="Run this command just *before* launching the container. This is "
         " valid only when the '-run' option is passed.")
+    both.add_argument("-runas", choices=["user", "root", "uid"],
+        default="user", type=str,
+        help="Run as specified. Default is root. Options: "
+        " user [run as current user by switching user inside the container]."
+        " root [run as root, without any of these switching abilities]."
+        " uid  ['-u' option to docker. To run on non-privileged containers].")
     both.add_argument("-v", default=[], action="append", type=str,
         help="Volumes to mount. Same syntax as docker run")
     # commands
@@ -378,6 +378,8 @@ class EnrootRunner:
         cmd = ["start"]
         cmd += self.__getVols()
         cmd += self.__getEnvVars()
+        if self.args.runas == "root":
+            cmd.append("--root")
         cmd.append(self.args.enroot_img)
         cmd += self.__getCmd()
         if self.args.precmd:
