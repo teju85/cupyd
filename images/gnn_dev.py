@@ -23,7 +23,7 @@ def images():
     imgs = {}
     for osVer in ["20.04"]:
         verStr = osVer.replace(".", "")
-        for cudaVer in ["11.2", "11.5"]:
+        for cudaVer in ["11.5"]:
             _, _, cu_short, _ = modules.cuda.shortVersion(cudaVer)
             cu_short = cu_short.replace(".", "")
             imgName = "gnn-dev:%s-%s" % (verStr, cu_short)
