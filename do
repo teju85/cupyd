@@ -66,17 +66,19 @@ def listimages(dir="images"):
 
 def validateargs(args):
     if not args.list and args.img is None:
-        raise Exception("'img' is mandatory if '-list' is not passed!")
+        raise Exception("'<img>' is mandatory if '-list' is not passed!")
     if args.build and args.pull:
         raise Exception("Cannot pass both '-build' and '-pull'!")
     if args.pull and args.push:
         raise Exception("Useless combination of options '-pull' and '-push'!")
     if args.build and not args.img:
-        raise Exception("'-image' is needed with '-build'!")
+        raise Exception("'<img>' is needed with '-build'!")
     if args.copy and not args.build:
         raise Exception("'-copy' is meaningful only with '-build'!")
     if args.create and not args.enrootdir:
         raise Exception("'-enrootdir' is mandatory with '-create'!")
+    if args.enrootdir and not os.path.exists(args.enrootdir):
+        raise Exception("'-enrootdir' does not exist!")
     if not args.list:
         args.module, args.imgArgs = findimage(args)
 
@@ -84,61 +86,76 @@ def validateargs(args):
 def parseargs():
     desc = "Wrapper to work with gpu containers"
     parser = argparse.ArgumentParser(description=desc)
-    parser.add_argument("-build", default=False, action="store_true",
-        help="Build the docker image locally first")
-    parser.add_argument("-cap", default=[], action="append",
-        help="Add capabilities to the container at runtime")
-    parser.add_argument("-copy", default=None, type=str,
-        help="Copy the temporary build dir into this dir")
-    parser.add_argument("-dns", default=[], action="append", type=str,
+    # options that are only valid with docker
+    docker = parser.add_argument_group(
+        "docker", "Options only valid when building/running via docker")
+    docker.add_argument("-cap", default=[], action="append",
+        help="Add capabilities to the container at runtime.")
+    docker.add_argument("-copy", default=None, type=str,
+        help="Copy the temporary build dir into this dir. Useful when one wants"
+        " to share this with another person to build the images.")
+    docker.add_argument("-dns", default=[], action="append", type=str,
         help="Pass DNS servers to be used inside container")
-    parser.add_argument("-enrootdir", default=None, type=str,
-        help="Enroot data path variable")
-    parser.add_argument("-env", default=[], action="append", type=str,
-        help="Pass environmental variables to be used inside container")
-    parser.add_argument("-gdb", default=False, action="store_true",
+    docker.add_argument("-gdb", default=False, action="store_true",
         help="Enable ptrace capability needed for gdb sessions")
-    parser.add_argument("-hostname", action="store_true", default=False,
+    docker.add_argument("-hostname", action="store_true", default=False,
         help="Pass '-h' option to docker run")
-    parser.add_argument("-ipc", default=None, type=str,
+    docker.add_argument("-ipc", default=None, type=str,
         help="how to use shared memory between processes.")
-    parser.add_argument("-list", action="store_true", default=False,
-        help="List all images supported")
-    parser.add_argument("-noExposePorts", action="store_true", default=False,
+    docker.add_argument("-noExposePorts", action="store_true", default=False,
         help="Do not expose ports to the host machine")
-    parser.add_argument("-onlycopy", action="store_true", default=False,
+    docker.add_argument("-onlycopy", action="store_true", default=False,
         help="Only copy the Dockerfile folder")
-    parser.add_argument("-path", default="images", type=str,
-        help="Path where to find the images")
-    parser.add_argument("-precmd", default=None, type=str,
-        help="Run this command just *before* launching the container. This is "
-        " valid only when the '-run' option is passed.")
-    parser.add_argument("-printComments", action="store_true", default=False,
+    docker.add_argument("-path", default="images", type=str,
+        help="Path where to find the definition of the images")
+    docker.add_argument("-printComments", action="store_true", default=False,
         help="Print the origin of docker commands in the generated Dockerfile")
-    parser.add_argument("-privileged", action="store_true", default=False,
+    docker.add_argument("-privileged", action="store_true", default=False,
         help="Pass a '--privileged' option to docker run command.")
-    parser.add_argument("-pull", action="store_true", default=False,
-        help="Pull the image first from a remote registry.")
-    parser.add_argument("-push", action="store_true", default=False,
-        help="Push the local image to a remote registry.")
-    parser.add_argument("-repo", default="nvcr.io/nvidian/dt-compute/teju85-",
+    docker.add_argument("-repo", default="nvcr.io/nvidian/dt-compute/teju85-",
         type=str, help="Remote registry prefix to pull/push this image from/to")
-    parser.add_argument("-create", default=False, action="store_true",
-        help="Create enroot image from the docker image. If this option is passed"
-        " then '-enrootdir' is mandatory")
-    parser.add_argument("-run", default=False, action="store_true",
-        help="Run the image to launch a container. If '-enrootdir' is passed"
-        " then 'enroot start' will be used instead.")
-    parser.add_argument("-runas", choices=["user", "root", "uid"],
+    docker.add_argument("-runas", choices=["user", "root", "uid"],
         default="user", type=str,
         help="Run as specified. Default is root. Options: "
         " user [run as current user by switching user inside the container]"
         " root [run as root, without any of these switching abilities]"
         " uid  ['-u' option to docker. To run on non-privileged containers]")
-    parser.add_argument("-security", type=str, default=None,
+    docker.add_argument("-security", type=str, default=None,
         help="Same as --security-opt option of docker")
-    parser.add_argument("-v", default=[], action="append", type=str,
+    # options that work with both docker/enroot
+    both = parser.add_argument_group(
+        "both", "Options that work with both docker and enroot")
+    both.add_argument("-env", default=[], action="append", type=str,
+        help="Pass environmental variables to be used inside container")
+    both.add_argument("-list", action="store_true", default=False,
+        help="List all images supported")
+    both.add_argument("-precmd", default=None, type=str,
+        help="Run this command just *before* launching the container. This is "
+        " valid only when the '-run' option is passed.")
+    both.add_argument("-v", default=[], action="append", type=str,
         help="Volumes to mount. Same syntax as docker run")
+    # commands
+    cmds = parser.add_argument_group(
+        "commands", "Options that indicate a specific command")
+    cmds.add_argument("-build", default=False, action="store_true",
+        help="Build the docker image locally first. Cannot pass both '-build'"
+        " and '-pull' options together!")
+    cmds.add_argument("-create", default=False, action="store_true",
+        help="Create enroot image from the docker image. If this option is passed"
+        " then '-enrootdir' is mandatory!")
+    cmds.add_argument("-pull", action="store_true", default=False,
+        help="Pull the image first from a remote registry.")
+    cmds.add_argument("-push", action="store_true", default=False,
+        help="Push the local image to a remote registry.")
+    cmds.add_argument("-run", default=False, action="store_true",
+        help="Run the image to launch a container. If '-enrootdir' is passed"
+        " then 'enroot start' will be used instead.")
+    # enroot specific options
+    enroot = parser.add_argument_group(
+        "enroot", "Options that work only with enroot")
+    enroot.add_argument("-enrootdir", default=None, type=str,
+        help="Enroot data path variable (aka ENROOT_DATA_PATH env var)")
+    # positional args
     parser.add_argument("img", type=str, nargs="?",
         help="Image to build/push/pull/run")
     parser.add_argument("cmd", nargs=argparse.REMAINDER,
