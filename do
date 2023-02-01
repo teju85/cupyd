@@ -163,7 +163,10 @@ def parseargs():
     args = parser.parse_args()
     args.path = args.path.rstrip("/")
     sys.path.append(args.path)
-    args.enroot_img = args.img.replace(":", "+")
+    if args.img is not None:
+        args.enroot_img = args.img.replace(":", "+")
+    else:
+        args.enroot_img = None
     validateargs(args)
     return args
 
