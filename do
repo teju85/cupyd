@@ -102,6 +102,9 @@ def parseargs():
         help="Pass '-h' option to docker run")
     docker.add_argument("-ipc", default=None, type=str,
         help="how to use shared memory between processes.")
+    docker.add_argument("-mountHome", action="store_true", default=False,
+        help="Mount home folder from host to container. Only compatible with"
+        " '-runas uid' currently")
     docker.add_argument("-noExposePorts", action="store_true", default=False,
         help="Do not expose ports to the host machine")
     docker.add_argument("-onlycopy", action="store_true", default=False,
@@ -163,6 +166,12 @@ def parseargs():
     args = parser.parse_args()
     args.path = args.path.rstrip("/")
     sys.path.append(args.path)
+    if args.runas != "uid" and args.mountHome:
+        raise Exception("'-mountHome' is only compatible with '-runas uid'")
+    if args.mountHome:
+        print("******NOTE****** please execute 'export HOME=%s' inside your "
+              "container commandline in order to use your home folder "
+              "seamlessly inside the container!" % os.path.expanduser("~"))
     if args.img is not None:
         args.enroot_img = args.img.replace(":", "+")
     else:
@@ -288,10 +297,10 @@ class DockerRunner:
         out = socket.getaddrinfo(rhost, 0)
         return out[0][4][0]
 
-    def __getCurrentMount(self):
+    def __getMount(self, folder):
         cmd = []
-        out = subprocess.check_output("df . | tail -n1 | awk '{print $1,$NF}'",
-                                      shell=True)
+        out = subprocess.check_output(
+            "df %s | tail -n1 | awk '{print $1,$NF}'" % folder, shell=True)
         out = out.rstrip()
         out = out.decode("UTF-8")
         dirs = out.split(" ")
@@ -327,7 +336,9 @@ class DockerRunner:
         vols = []
         for vol in args.v:
             vols.append("-v %s" % vol)
-        vols += self.__getCurrentMount()
+        vols += self.__getMount(os.getcwd())
+        if args.mountHome:
+            vols += self.__getMount(os.path.expanduser("~"))
         return vols
 
     def __getDns(self, args):
