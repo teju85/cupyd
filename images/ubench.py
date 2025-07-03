@@ -21,7 +21,14 @@ def emit(writer, **kwargs):
                      "python3", "python3-pip"])
     writer.emit("RUN pip3 install matplotlib numpy pandas")
     modules.openmpi.emit(writer)
-    ncclVersion = "2.18.1"
+    ncclVersions = {
+        "11.8": "2.16.5",
+        "12.0": "2.18.1",
+        "12.1": "2.18.3",
+        "12.2": "2.19.3",
+        "12.3": "2.19.3",
+    }
+    ncclVersion = ncclVersions[kwargs["cudaVersion"]]
     writer.packages(["libnccl2=$ncclVersion-1+cuda$$CUDA_VERSION_SHORT",
                      "libnccl-dev=$ncclVersion-1+cuda$$CUDA_VERSION_SHORT"],
                     ncclVersion=ncclVersion)
